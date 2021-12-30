@@ -85,6 +85,13 @@ gruppr#2293
 
 Have fun using this I hope it will help
 
+# Update roadmap
+These are the plans what I am trying to add.
+
+- Web GUI for restoring/backuping the members
+- Telegram bot For restoring/backuping
+- Easier instalation, via batch or via linux instalation file
+
 # Advanced
 This is for the PRO coders
 You can edit the discordauth HTML template if you want. It is located in the folder template
