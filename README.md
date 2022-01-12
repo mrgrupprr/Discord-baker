@@ -81,7 +81,7 @@ You will need to set your server so you can only see channels if you have the ve
 # Endnote
 Please leave a like this took lots of time to code and it wasn't easy.
 If you have any questions dm me on discord: 
-gruppr#2293
+Ha̶ze#2293
 
 Have fun using this I hope it will help
 
