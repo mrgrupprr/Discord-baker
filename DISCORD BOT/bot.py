@@ -16,7 +16,7 @@ guild = 919201123123124334 # YOUR INTEGER GUILD ID HERE
 welcome_channel = 919512312311222480 # YOUR WELCOME CHANNEL ID HERE
 memberrole = 919556512517258 # YOUR MEMBER ROLE ID HERE
 clientid = 'clientidhere'
-domain = 'http://domain.com' #this is for the flask server we set up (RESTORE API)
+domain = 'https://domain.com' #this is for the flask server we set up (RESTORE API)
 
 
 #ignore this 
