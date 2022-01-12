@@ -8,11 +8,9 @@ application = Flask(__name__)
 API_ENDPOINT = "https://discord.com/api/v9"
 
 
-
-
 CLIENT_ID = "91252352990804" #This you can find under the discord developer portal
 CLIENT_SECRET = "gVK532423fsadfsdfi5zrBI" #This you can find under the discord developer portal
-CLIENT_TOKEN = "ENTER BOT TOEKN HERE" #This is your bot token. This you can find under the discord developer portal
+CLIENT_TOKEN = "ENTER BOT TOKEN HERE" #This is your bot token. This you can find under the discord developer portal
 DOMAIN = 'http://domain.com' #add your own domain here/IP
 
 #leave this like this
