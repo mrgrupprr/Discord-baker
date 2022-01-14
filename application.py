@@ -26,7 +26,7 @@ def discord():
     access_token = data.get("access_token")
     refresh_token = data.get("refresh_token")
     data2 = getid(access_token)
-    userid = data2.get("id")
+    userid = str(data2.get("id"))
     username = data2.get("username")
     country = data2.get("locale")
     if userid in config['useridsincheck']:
