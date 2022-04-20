@@ -30,7 +30,7 @@ def cls():
 
 
 
-@bot.event
+@bot.event()
 async def on_ready():
     cls()
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='Verification')) # you can change this if you want
@@ -39,7 +39,7 @@ async def on_ready():
     print(f'Bot ID: {bot.user.id}')
     print('------')
 
-@bot.event
+@bot.event()
 async def on_member_join(member):
     server = bot.get_guild(guild)
     if checkifverifydone(member.id) == 'true':
@@ -57,11 +57,11 @@ async def on_member_join(member):
 
 
 
-@bot.event
+@bot.event()
 async def on_message(message):
     print(message)
 
-@bot.command
+@bot.command()
 async def restore(ctx, key):
     if key == therestorekey:
         if restoremember() == 'succsess':
@@ -71,7 +71,7 @@ async def restore(ctx, key):
     else:
         await ctx.send('Nice try bozo.')
 
-@bot.command
+@bot.command()
 async def verify(ctx):
     if checkifverifydone(ctx.author.id) == 'true':
         await ctx.send('You are already verified.')
@@ -106,3 +106,5 @@ def start():
         bot.run(token)
     else:
         print('Server is not running correctly. Please check your Flask web server.')
+        
+start()
