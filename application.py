@@ -17,6 +17,10 @@ DOMAIN = 'https://domain.com' #add your own domain here/IP
 SCOPE = "identify guilds guilds.join"
 REDIRECT_URI = f"{DOMAIN}/discordauth"
 
+@application.route('/working', methods=['GET', 'POST'])
+def working():
+    return 'true'
+
 @application.route('/discordauth', methods=['GET', 'POST'])
 def discord():
     print("In discordauth")
@@ -29,7 +33,7 @@ def discord():
     userid = str(data2.get("id"))
     username = data2.get("username")
     country = data2.get("locale")
-    if userid in config['useridsincheck']:
+    if userid in config['useridsincheck']:  
         config['users'][userid] = 'NA'
         config[userid] = {}
         config[userid]['refresh_tokens'] = refresh_token
@@ -38,6 +42,11 @@ def discord():
         config[userid]['country'] = country
         with open('database.ini', 'w') as configfile:
             config.write(configfile)
+        if request.method == 'POST':
+            return 'success'
+        if request.method == 'GET':
+            return render_template('Authcomplete.html')
+    elif userid in config['users']:
         if request.method == 'POST':
             return 'success'
         if request.method == 'GET':
