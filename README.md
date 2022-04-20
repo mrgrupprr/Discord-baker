@@ -78,6 +78,12 @@ python bot.py
 Now your all set.
 You will need to set your server so you can only see channels if you have the verified role
 
+To restore the users do:
+```
+!restore YOURRESTOREKEY
+```
+Now all users will be back added.
+
 # Endnote
 Please leave a like this took lots of time to code and it wasn't easy.
 If you have any questions dm me on discord: 
