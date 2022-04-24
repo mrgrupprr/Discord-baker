@@ -33,44 +33,31 @@ For now, we are done here.
 
 ## Installation FLASK API PART 1
 This will be very easy
-First, open up application.py in there we will need to edit 4 things: CLIENT_ID, CLIENT_SECRET, CLIENT_TOKEN (this is the bot token) , DOMAIN
-![Code_0y0g98DHkN](https://user-images.githubusercontent.com/70100389/147709827-a6b63068-7b4b-43ea-be86-09dba949a230.png)
 
-INSERT the things from the discord dashboard
-
-NOW THIS IS VERY IMPORTANT GO INTO database.ini with any text editor and ADD YOUR SERVER ID UNDER guildid
-![Code_qLuYfrIB23](https://user-images.githubusercontent.com/70100389/147711090-62a23267-8c57-46b4-9794-cb0534354c3b.png)
+First install the requirements: 
 ```
-guildid = 825892582
-```
+pip install -r requirements.txt
+``` 
+, open up setup.py in there we will need to input 4 things: CLIENT_ID, CLIENT_SECRET, CLIENT_TOKEN (this is the bot token) , DOMAIN, welcome_channel, Member-role. 
 
 
 If you want to test some stuff or add some go ahead but be sure to leave a like.
-Now save this file.
+Now it will ask you if you want to start the API say yes.
 
 ## Installation Discord bot PART 2
 INFO❗: You can make your own discord bot if you want this whole process is API-based so if you want you can even make a telegram bot whatever you wish suits you best.
 
 We are now going to open bot.py
-Now we are going to edit 6 things: token(bot token), guild(put your guild ID there), welcome_channel(were new people are getting greeted), memberrole(this is the verified role that will be added after passing verification), 
-clientid(From discord dashboard), domain(your domain).
-
-![Code_AzXE5UdUt4](https://user-images.githubusercontent.com/70100389/147710141-6d482942-a5af-48d5-87df-cb13f5ace2de.png)
-Now Save this.
-
-We are here now done
+Now we are going to enter the domain the Bot will automaticly fetch all details. It will start after automatic.
 
 ## Starting the system
-FIRST WERE GONNA INSTALL THE REQUIREMENTS on your flask server/ discord linux server
+If you want you can copy the files to your server to run there or leave it on your PC
 
-```bash
-pip install -r requirements.txt
-```
 
 first, we are gonna make a flask server if you don't know how to [watch this](https://www.youtube.com/watch?v=goToXTC96Co&t=3266s) 
 
 
-After flask server deployment your gonna run the bot:
+After flask server deployment running your gonna run the bot:
 ```bash
 python bot.py
 ```
@@ -96,6 +83,8 @@ These are the plans what I am trying to add.
 
 - Web GUI for restoring/backuping the members
 - Telegram bot For restoring/backuping
+
+DONE:
 - Easier instalation, via batch or via linux instalation file
 
 # Advanced
