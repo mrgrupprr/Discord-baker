@@ -7,15 +7,20 @@ config.read('database.ini')
 application = Flask(__name__)
 API_ENDPOINT = "https://discord.com/api/v9"
 
-
-CLIENT_ID = "91252352990804" #This you can find under the discord developer portal
-CLIENT_SECRET = "gVK532423fsadfsdfi5zrBI" #This you can find under the discord developer portal
-CLIENT_TOKEN = "ENTER BOT TOKEN HERE" #This is your bot token. This you can find under the discord developer portal
-DOMAIN = 'https://domain.com' #add your own domain here/IP
-
 #leave this like this
+CLIENT_ID = config['apiinfo']['CLIENT_ID']
+CLIENT_SECRET = config['apiinfo']['CLIENT_SECRET']
+CLIENT_TOKEN = config['botinfo']['bottoken']
+DOMAIN = config['apiinfo']['DOMAIN']
+exchangepass = config['apiinfo']['exchangepass']
 SCOPE = "identify guilds guilds.join"
 REDIRECT_URI = f"{DOMAIN}/discordauth"
+welcomechannel = str(config['botinfo']['welcome_channel'])
+memberrole = str(config['botinfo']['memberrole'])
+restorekey = str(config['botinfo']['therestorekey'])
+guildid = config['info']['guildid']
+
+
 
 @application.route('/working', methods=['GET', 'POST'])
 def working():
@@ -58,7 +63,7 @@ def discord():
 @application.route('/restore', methods=['GET', 'POST'])
 def restore():
     password = request.json['code']
-    if password == "crackers":
+    if password == exchangepass:
         restoreserver()
         return 'succsess'
     else:
@@ -86,10 +91,9 @@ def requestid():
     print("Part requestid")
     key = request.json['key']
     id = str(request.json['id'])
-    apikey = "thisisthekey"
     print(id)
     print(key)
-    if key == apikey:
+    if key == exchangepass:
         if id in config['users']:
             return 'succsess'
         else:
@@ -104,8 +108,40 @@ def requestid():
         print("key was wrong")
         return 'wrong key'
 
-    
 
+
+
+
+@application.route('/data', methods=['GET', 'POST'])
+def data():
+    key = request.json['key']
+    dataset = request.json['dataset']
+    print("part data")
+    if key == config['apiinfo']['tempkey']:
+        if dataset == 'CLIENT_ID':
+            return CLIENT_ID
+        if dataset == 'guildid':
+            return guildid
+        if dataset == 'CLIENT_SECRET':
+            return CLIENT_SECRET
+        if dataset == 'bottoken':
+            return CLIENT_TOKEN
+        if dataset == 'exchangepass':
+            return exchangepass
+        if dataset == 'welcomechannel':
+            return welcomechannel
+        if dataset == 'verifiedrole':
+            return memberrole
+        if dataset == 'restorekey':
+            return restorekey
+    if config['apiinfo']['botsetupcomplete'] == 'no':
+        if dataset == 'pass':
+            return config['apiinfo']['tempkey']
+    config['apiinfo']['botsetupcomplete'] = 'yes'
+    with open('database.ini', 'w') as configfile:
+        config.write(configfile)
+    return 'error dataset wrong'
+        
 @application.route('/checkifverifydone', methods=['GET', 'POST'])
 def checkifverifydone():
     print("Part checkifverifydone")
@@ -113,8 +149,7 @@ def checkifverifydone():
     id = str(request.json['id'])
     print(id)
     print(key)
-    apikey = "waiting"
-    if key == apikey:
+    if key == exchangepass:
         print("key was correct")
         if id in config['users']:
             config['useridsincheck'][id] == 'verified'
@@ -214,4 +249,4 @@ def restoreserver():
         
 
 if __name__ == '__main__':
-      application.run(host='0.0.0.0', port=80) #change to your port default port is 80
+    application.run(host='0.0.0.0', port=80) #change to your port default port is 80
