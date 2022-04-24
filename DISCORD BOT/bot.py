@@ -3,34 +3,34 @@ import asyncio
 import requests
 import os
 import discord.utils
+import configparser
 from discord.ext import commands
 from discord.utils import get
 from discord.ext.commands import Bot
 
+config = configparser.ConfigParser()
+config.read('botdatabase.ini')
 intents = discord.Intents.default()
 intents.members = True
 bot = Bot(command_prefix = '!', intents=intents)
 
-
-token = 'TOKEN HERE' #enter your bot token here
-guild = 'Your guild ID' # YOUR INTEGER GUILD ID HERE
-welcome_channel = 'Welcome Channel ID' # YOUR WELCOME CHANNEL ID HERE
-memberrole = 'Verified role' # YOUR MEMBER ROLE ID HERE
-clientid = 'clientidhere' #enter your client id here
-therestorekey = 'crackers' #enter your restore key here so only admin can run the command
-domain = 'https://domain-or-ip.com' #this is for the flask server we set up (RESTORE API) / Please don`t add a slash at the end.
-
-
 #ignore this 
+token = str(config['botinfo']['bottoken'])
+guild = int(config['botinfo']['guildid'])
+welcome_channel = int(config['botinfo']['welcome_channel'])
+memberrole = int(config['botinfo']['memberrole'])
+clientid = config['botinfo']['client_id']
+therestorekey = config['botinfo']['therestorekey']
+domain = config['botinfo']['domain']
+exchangepass = config['botinfo']['exchangepass']
+tempkey = config['botinfo']['tempkey']
 url = f'https://discord.com/oauth2/authorize?response_type=code&client_id={clientid}&scope=identify+guilds.join&state=15773059ghq9183habn&redirect_uri={domain}/discordauth'
 
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
-
-@bot.event()
+@bot.event
 async def on_ready():
     cls()
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='Verification')) # you can change this if you want
@@ -39,7 +39,7 @@ async def on_ready():
     print(f'Bot ID: {bot.user.id}')
     print('------')
 
-@bot.event()
+@bot.event
 async def on_member_join(member):
     server = bot.get_guild(guild)
     if checkifverifydone(member.id) == 'true':
@@ -49,62 +49,104 @@ async def on_member_join(member):
         await member.send(f'Your verified.')
         await member.send(f'Welcome back to {server}!')
     else:
-        await bot.get_channel(welcome_channel).send(f'Welcome {member.mention} to the {server}! Please look into your dms in order to get started.')
+        await bot.get_channel(welcome_channel).send(f'Welcome {member.mention} to the {server} ! Please look into your dms in order to get verified.')
         await member.send(f'Welcome to {server}! Please verify here: ' + url)
         await member.send(f'If you have any questions, please contact a moderator.')
         await member.send(f'After succsesful verify please enter !verify.')
+        sendrequestforpending(member.id)
         
-
-
-
-@bot.event()
-async def on_message(message):
-    print(message)
 
 @bot.command()
 async def restore(ctx, key):
+    await ctx.message.delete()
     if key == therestorekey:
         if restoremember() == 'succsess':
-            await ctx.send('Restored.')
+            await ctx.send('Restored.', delete_after=3)
         else:
-            await ctx.send('Not restored.')
+            await ctx.send('Not restored.', delete_after=3)
     else:
-        await ctx.send('Nice try bozo.')
+        await ctx.send('Nice try bozo.', delete_after=3)
 
 @bot.command()
 async def verify(ctx):
-    if checkifverifydone(ctx.author.id) == 'true':
-        await ctx.send('You are already verified.')
-    else:
-            if checkifverifydone(ctx.author.id) == 'true':
-                #role user as verified
-                role = discord.utils.get(bot.get_guild(guild).roles, id= memberrole)
-                await ctx.author.add_roles(role)
-                await ctx.send(f'Your verified.')
-            else:
-                await ctx.send(f'Your not verified. Please contact a administrator.')
+        if checkifverifydone(ctx.author.id) == 'true':
+            #role user as verified
+            role = discord.utils.get(bot.get_guild(guild).roles, id= memberrole)
+            await ctx.author.add_roles(role)
+            await ctx.send(f'Your verified. have fun!')
+        else:
+            await ctx.send(f'Your not verified. Please contact a administrator.')
+
+@bot.command()
+async def test(ctx):
+    await ctx.send('test')
 
 def sendrequestforpending(idofuser):
-    r1 = requests.post(f'{domain}/requestid', json={'key': 'thisisthekey', 'id': idofuser})
+    r1 = requests.post(f'{domain}/requestid', json={'key': exchangepass, 'id': idofuser})
     print(r1.text)
     return r1.text
 
 def checkifverifydone(idofuser):
-    r2 = requests.post(f'{domain}/checkifverifydone', json={'key': 'waiting', 'id': idofuser})
+    r2 = requests.post(f'{domain}/checkifverifydone', json={'key': exchangepass, 'id': idofuser})
     print(r2.text)
     return r2.text
 
 def restoremember():
-    r2 = requests.post(f'{domain}/restore', json={'code': 'crackers'})
+    r2 = requests.post(f'{domain}/restore', json={'code': exchangepass})
     print(r2.text)
     return r2.text
 
 
 def start():
-    r = f'{domain}/working'
+    if config['setup']['setup'] == 'no':
+        setup()
+    else:
+        r = requests.post(f'{domain}/working')
+        if r.text == 'true':
+            bot.run(token)
+        else:
+            print('Server is not running correctly. Please check your Flask web server.')
+
+
+def setup():
+    cls()
+    print("Welcome to the bot setup be sure to setup first teh flask server")
+    print("If you have not setup the flask server yet, please do so now.")
+    print("")
+    print("If you have setup the flask server, please enter the following information.")
+    print("")
+    print("Enter the domain/ip of the flask server: ")
+    domain = input()
+    r = requests.post(f'{domain}/working')
     if r.text == 'true':
-        bot.run(token)
+        pass
     else:
         print('Server is not running correctly. Please check your Flask web server.')
-        
+        waitformesweety = input()
+    r2 = requests.post(f'{domain}/data', json={'key': 'test', 'dataset': 'pass'})
+    config['botinfo']['tempkey'] = r2.text
+    with open('botdatabase.ini', 'w') as configfile:
+        config.write(configfile)
+    r1 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'CLIENT_ID'})
+    r3 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'bottoken'})
+    r5 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'exchangepass'})
+    r6 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'welcomechannel'})
+    r7 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'verifiedrole'})
+    r8 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'restorekey'})
+    r9 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'guildid'})
+    config['botinfo']['bottoken'] = r3.text
+    config['botinfo']['welcome_channel'] = r6.text
+    config['botinfo']['memberrole'] = r7.text
+    config['botinfo']['therestorekey'] = r8.text
+    config['botinfo']['exchangepass'] = r5.text
+    config['botinfo']['domain'] = domain
+    config['botinfo']['client_id'] = r1.text
+    config['botinfo']['guildid'] = r9.text
+    config['setup']['setup'] = 'yes'
+    with open('botdatabase.ini', 'w') as configfile:
+        config.write(configfile)
+    print('Setup complete. Please press any button to start the bot')
+    waitformesweety = input()
+    start()
+
 start()
