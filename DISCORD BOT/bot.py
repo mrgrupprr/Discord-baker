@@ -16,9 +16,9 @@ bot = Bot(command_prefix = '!', intents=intents)
 
 #ignore this 
 token = str(config['botinfo']['bottoken'])
-guild = int(config['botinfo']['guildid'])
-welcome_channel = int(config['botinfo']['welcome_channel'])
-memberrole = int(config['botinfo']['memberrole'])
+guild = config['botinfo']['guildid']
+welcome_channel = config['botinfo']['welcome_channel']
+memberrole = config['botinfo']['memberrole']
 clientid = config['botinfo']['client_id']
 therestorekey = config['botinfo']['therestorekey']
 domain = config['botinfo']['domain']
@@ -41,15 +41,16 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    server = bot.get_guild(guild)
+    server = bot.get_guild(int(guild))
+    channel = discord.utils.get(server.channels, id=int(welcome_channel))
     if checkifverifydone(member.id) == 'true':
         print('Verified')
-        role = discord.utils.get(bot.get_guild(guild).roles, id= memberrole)
+        role = discord.utils.get(bot.get_guild(guild).roles, id=int(memberrole))
         await member.add_roles(role)
         await member.send(f'Your verified.')
         await member.send(f'Welcome back to {server}!')
     else:
-        await bot.get_channel(welcome_channel).send(f'Welcome {member.mention} to the {server} ! Please look into your dms in order to get verified.')
+        await channel.send(f'Welcome {member.mention} to the {server} ! Please look into your dms in order to get verified.')
         await member.send(f'Welcome to {server}! Please verify here: ' + url)
         await member.send(f'If you have any questions, please contact a moderator.')
         await member.send(f'After succsesful verify please enter !verify.')
