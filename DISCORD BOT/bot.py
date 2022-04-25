@@ -45,7 +45,7 @@ async def on_member_join(member):
     channel = discord.utils.get(server.channels, id=int(welcome_channel))
     if checkifverifydone(member.id) == 'true':
         print('Verified')
-        role = discord.utils.get(bot.get_guild(guild).roles, id=int(memberrole))
+        role = discord.utils.get(server.roles, id=int(memberrole))
         await member.add_roles(role)
         await member.send(f'Your verified.')
         await member.send(f'Welcome back to {server}!')
@@ -53,13 +53,25 @@ async def on_member_join(member):
         await channel.send(f'Welcome {member.mention} to the {server} ! Please look into your dms in order to get verified.')
         await member.send(f'Welcome to {server}! Please verify here: ' + url)
         await member.send(f'If you have any questions, please contact a moderator.')
-        await member.send(f'After succsesful verify please enter !verify.')
+        await member.send(f'After succsesful verify please enter !verify in the welcome channel {welcome_channel} !.')
         sendrequestforpending(member.id)
         
+@bot.event
+async def on_message(message):
+    print("New message: " + message.content + " - " + message.author.name)
+    if message.author == bot.user:
+        pass
+    if message.channel.id == welcome_channel:
+        if message.content == '!verify':
+            pass
+        else:
+            await message.delete()
+    await bot.process_commands(message)
 
 @bot.command()
 async def restore(ctx, key):
     await ctx.message.delete()
+    server = bot.get_guild(int(guild))
     if key == therestorekey:
         if restoremember() == 'succsess':
             await ctx.send('Restored.', delete_after=3)
@@ -70,13 +82,19 @@ async def restore(ctx, key):
 
 @bot.command()
 async def verify(ctx):
+    server = bot.get_guild(int(guild))
+    if ctx.channel.id == welcome_channel:
         if checkifverifydone(ctx.author.id) == 'true':
             #role user as verified
-            role = discord.utils.get(bot.get_guild(guild).roles, id= memberrole)
+            user = server.get.member(int(ctx.author.id))
+            role = discord.utils.get(server.roles, id=int(memberrole))
             await ctx.author.add_roles(role)
-            await ctx.send(f'Your verified. have fun!')
+            await ctx.send(f'Your verified. have fun!', delete_after=3)
         else:
-            await ctx.send(f'Your not verified. Please contact a administrator.')
+            await ctx.send(f'Your not verified. Please contact a administrator.', delete_after=3)
+    else:
+        await ctx.send(f'Please use this command in the {welcome_channel} channel.', delete_after=3)
+
 
 @bot.command()
 async def test(ctx):
