@@ -74,8 +74,10 @@ Now all users will be back added.
 
 # Endnote
 Please leave a like this took lots of time to code and it wasn't easy.
-If you have any questions dm me on discord: 
+If you have any questions dm me on discord:
+```
 Ha̶ze#2293
+```
 
 Have fun using this I hope it will help
 
