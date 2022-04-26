@@ -1,6 +1,9 @@
 import requests
 import configparser
+import os
 from flask import Flask, request, redirect, url_for, render_template
+
+
 
 config = configparser.ConfigParser()
 config.read('database.ini')
@@ -20,7 +23,8 @@ memberrole = str(config['botinfo']['memberrole'])
 restorekey = str(config['botinfo']['therestorekey'])
 guildid = config['info']['guildid']
 
-
+def cls():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 @application.route('/working', methods=['GET', 'POST'])
 def working():
@@ -253,4 +257,5 @@ def restoreserver():
         
 
 if __name__ == '__main__':
+    cls()
     application.run(host='0.0.0.0', port=80) #change to your port default port is 80
