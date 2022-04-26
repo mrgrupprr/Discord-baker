@@ -74,7 +74,7 @@ def restore():
 
 @application.route('/', methods=['GET', 'POST'])
 def testbuild():
-    return render_template('welcome.html')
+    return render_template('home.html')
 
 def getid(info):
     url = "https://discord.com/api/v9/users/@me"
