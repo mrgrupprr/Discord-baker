@@ -76,7 +76,7 @@ Now all users will be back added.
 Please leave a like this took lots of time to code and it wasn't easy.
 If you have any questions dm me on discord:
 ```
-Ha̶ze#2293
+haze#2603
 ```
 
 Have fun using this I hope it will help
