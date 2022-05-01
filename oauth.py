@@ -1,9 +1,16 @@
-"""
-ENTER YOUR USER TOKEN ON LINE 22
-"""
 import logging
 import requests
 import os
+import configparser
+from setupfile import *
+
+
+config = configparser.ConfigParser()
+config.read('database.ini')
+
+
+discordtoken = input("Enter your discord token: ")
+
 ##############################
 logging.basicConfig(
     level=logging.INFO,
@@ -19,7 +26,7 @@ class CreateOauth:
     payload = {"name": "Member Backup"}
     headers = {
     "Authorization":
-    "ENTER UR TOKEN HERE",
+    f"{discordtoken}",
     "accept":
     "*/*",
     "accept-language":
@@ -79,11 +86,16 @@ class CreateOauth:
             logging.info("Added Domain To OAUTH Redirect")
             toekn = cls.get_token(id)
             secrt = cls.get_client_secret(id)
-            logging.info(f"Bot Token: {toekn}")
-            logging.info(f"Client ID: {id}")
-            logging.info(f"Client Secret: {secrt}")
+            config['botinfo']['bottoken'] = toekn
+            config['apiinfo']['CLIENT_ID'] = id
+            config['apiinfo']['CLIENT_SECRET'] = secrt
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
+            logging.info("Added Token To Database")
+            
         else:
             logging.error("Something Went Wrong!")
+
 
     @classmethod
     def create_bot(cls):
@@ -117,5 +129,8 @@ class CreateOauth:
             print(e)
             pass
 
-CreateOauth.set_info(domain = input(f"\t[Config] > Enter Domain/IP: "))
-CreateOauth.main()
+
+def startoauthdata(domaintogowith):
+    url = domaintogowith + '/discordauth'
+    CreateOauth.set_info(url)
+    CreateOauth.main()
