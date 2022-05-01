@@ -14,6 +14,15 @@ intents = discord.Intents.default()
 intents.members = True
 bot = Bot(command_prefix = '!', intents=intents)
 
+
+def fetchurlcorectly():
+    domainnormalized = domain
+    domainwithoutslash = domainnormalized[:-1]
+    if domain.endswith('/'):
+        return domainwithoutslash
+    else:
+        return domainnormalized
+
 #ignore this 
 token = str(config['botinfo']['bottoken'])
 guild = config['botinfo']['guildid']
@@ -24,8 +33,9 @@ therestorekey = config['botinfo']['therestorekey']
 domain = config['botinfo']['domain']
 exchangepass = config['botinfo']['exchangepass']
 tempkey = config['botinfo']['tempkey']
-url = f'https://discord.com/oauth2/authorize?response_type=code&client_id={clientid}&scope=identify+guilds.join&state=15773059ghq9183habn&redirect_uri={domain}/discordauth'
+url = f'https://discord.com/oauth2/authorize?response_type=code&client_id={clientid}&scope=identify+guilds.join&state=15773059ghq9183habn&redirect_uri={fetchurlcorectly()}/discordauth'
 
+        
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
