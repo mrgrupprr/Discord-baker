@@ -8,7 +8,7 @@ This can help you get all your members in 5 Seconds back after a raid if someone
 
 
 # AUTOMATED Setup
-Run oauth.py enter your DISCORD USER TOKEN and it will fetch all data aswell you need to start the setup.py credits to @swishyw
+Run setup.py and enter your ACCOUNT TOKEN and the server relevent stuff, add your bot to the server and the setup is done.  credits to @swishyw for the oauth.py file.
 
 # 1. Setup
 First, we are gonna need your discord bot token, Client ID, Client Secret.
