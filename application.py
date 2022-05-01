@@ -119,7 +119,15 @@ def data():
     key = request.json['key']
     dataset = request.json['dataset']
     print("part data")
-    if key == config['apiinfo']['tempkey']:
+    if config['apiinfo']['botsetupcomplete'] == 'no':
+        if dataset == 'pass':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
+            return config['apiinfo']['tempkey']
+        else:
+            return 'fail wrong pass u wanker'
+    elif key == config['apiinfo']['tempkey']:
         if dataset == 'CLIENT_ID':
             return CLIENT_ID
         if dataset == 'guildid':
@@ -136,13 +144,11 @@ def data():
             return memberrole
         if dataset == 'restorekey':
             return restorekey
-    if config['apiinfo']['botsetupcomplete'] == 'no':
-        if dataset == 'pass':
-            return config['apiinfo']['tempkey']
-    config['apiinfo']['botsetupcomplete'] = 'yes'
-    with open('database.ini', 'w') as configfile:
-        config.write(configfile)
-    return 'error dataset wrong'
+        else:
+            return 'fail datasetval needed'
+    else:
+        return 'fail key needed'
+
         
 @application.route('/checkifverifydone', methods=['GET', 'POST'])
 def checkifverifydone():
