@@ -53,17 +53,21 @@ async def on_ready():
 async def on_member_join(member):
     server = bot.get_guild(int(guild))
     channel = discord.utils.get(server.channels, id=int(welcome_channel))
+    await channel.send(f'Welcome {member.mention} to the {server} !.')
     if checkifverifydone(member.id) == 'true':
         print('Verified')
         role = discord.utils.get(server.roles, id=int(memberrole))
         await member.add_roles(role)
-        await member.send(f'Your verified.')
-        await member.send(f'Welcome back to {server}! ')
+        embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
+        embed3.set_footer(text="Made with love :)")
+        embed3.set_thumbnail(url=member.avatar_url)
+        await member.send(embed=embed3)
+
     else:
-        await channel.send(f'Welcome {member.mention} to the {server} !.')
-        await member.send(f'Welcome to {server}! Please verify yourself by clicking the link ' + url)
-        await member.send(f'If you have any questions, please contact a moderator.')
-        await member.send(f'After succsesful verify please enter !verify in dms!')
+        embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[https://discord.com/verify/961874227532189194]({url})", color=0xfbff00)
+        embed.set_footer(text="Once you click on the 'Authorize' button, use `!verify` in this DM.")
+        embed.set_thumbnail(url=member.avatar_url)
+        await member.send(embed=embed)
         sendrequestforpending(member.id)
         
 @bot.event
