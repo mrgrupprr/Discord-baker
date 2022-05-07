@@ -6,7 +6,7 @@ This can help you get all your members in 5 Seconds back after a raid if someone
 🛑IMPORTANT🛑:What you will need is a discord bot, a discord application, and a server.
 
 
-#🛑IMPORTANT NOTICE🛑
+# 🛑IMPORTANT NOTICE🛑
 TO USE MULTIPLE SERVERS THE VERIFIED ROLE NEEDS TO HAVE ON BOTH SERVERS THE SAME ROLE NAME
 
 
