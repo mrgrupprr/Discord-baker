@@ -18,7 +18,6 @@ DOMAIN = config['apiinfo']['DOMAIN']
 exchangepass = config['apiinfo']['exchangepass']
 SCOPE = "identify guilds guilds.join"
 REDIRECT_URI = f"{DOMAIN}/discordauth"
-welcomechannel = str(config['botinfo']['welcome_channel'])
 memberrole = str(config['botinfo']['memberrole'])
 restorekey = str(config['botinfo']['therestorekey'])
 
@@ -137,8 +136,6 @@ def data():
             return CLIENT_TOKEN
         if dataset == 'exchangepass':
             return exchangepass
-        if dataset == 'welcomechannel':
-            return welcomechannel
         if dataset == 'verifiedrole':
             return memberrole
         if dataset == 'restorekey':
