@@ -110,7 +110,7 @@ async def test(ctx):
     await ctx.send('test')
 
 def sendrequestforpending(idofuser, guildid):
-    config['memberids'][idofuser] = guildid
+    config['memberids'][str(idofuser)] = str(guildid)
     with open('botdatabase.ini', 'w') as configfile:
         config.write(configfile)
     try:
