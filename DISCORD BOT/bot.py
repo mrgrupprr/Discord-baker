@@ -69,7 +69,7 @@ async def on_member_join(member):
         embed.set_footer(text="Once you click on the 'Authorize' button, use `!verify` in this DM.")
         embed.set_thumbnail(url=member.avatar_url)
         await member.send(embed=embed)
-        sendrequestforpending(member.id)
+        sendrequestforpending(member.id, member.guild.id)
         
 @bot.event
 async def on_message(message):
@@ -92,14 +92,14 @@ async def restore(ctx, key, guildid):
 
 @bot.command()
 async def verify(ctx):
-    server = bot.get_guild(ctx.message.guild.id)
+    server = bot.get_guild(int(config['memberids'][str(ctx.author.id)]))
     role = discord.utils.get(server.roles, name=memberrole)
     member = server.get_member(ctx.message.author.id)
-    if checkifverifydone(ctx.author.id, ctx.message.guild.id) == 'true':
+    if checkifverifydone(ctx.author.id, config['memberids'][str(ctx.author.id)]) == 'true':
         #role user as verified
         await member.add_roles(role)
         await member.send(f'Your verified. have fun!')
-    elif checkifverifydone(ctx.author.id, ctx.message.guild.id) == 'error':
+    elif checkifverifydone(ctx.author.id, config['memberids'][str(ctx.author.id)]) == 'error':
         await ctx.send(f'Error verifying. Please contact a moderator.', delete_after=3)
     else:
         await ctx.send(f'Your not verified. Please contact a administrator.', delete_after=3)
@@ -109,7 +109,10 @@ async def verify(ctx):
 async def test(ctx):
     await ctx.send('test')
 
-def sendrequestforpending(idofuser):
+def sendrequestforpending(idofuser, guildid):
+    config['memberids'][idofuser] = guildid
+    with open('botdatabase.ini', 'w') as configfile:
+        config.write(configfile)
     try:
         r1 = requests.post(f'{domain}/requestid', json={'key': exchangepass, 'id': idofuser})
         print(r1.text)
