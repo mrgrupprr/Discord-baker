@@ -6,6 +6,9 @@ This can help you get all your members in 5 Seconds back after a raid if someone
 🛑IMPORTANT🛑:What you will need is a discord bot, a discord application, and a server.
 
 
+#🛑IMPORTANT NOTICE🛑
+TO USE MULTIPLE SERVERS THE VERIFIED ROLE NEEDS TO HAVE ON BOTH SERVERS THE SAME ROLE NAME
+
 
 # AUTOMATED Setup
 Run setup.py and enter your ACCOUNT TOKEN and the server relevent stuff, add your bot to the server and the setup is done.  credits to @swishyw for the oauth.py file.
@@ -68,7 +71,7 @@ You will need to set your server so you can only see channels if you have the ve
 
 To restore the users do:
 ```
-!restore YOURRESTOREKEY
+!restore YOURRESTOREKEY YOUROLDSERVERID
 ```
 Now all users will be back added.
 
