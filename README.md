@@ -1,9 +1,8 @@
 # 🤑Discord-backer🤑
 A open-source Discord member backup and restore tool for your server.
-This can help you get all your members in 5 Seconds back after a raid if someone destroyed your server.
+This bot gets users to Authorize themselves upon joining your server, and then later on, if your server is raided, or deleted, you can rejoin all the users who Authorized to a new server.
 
-
-🛑IMPORTANT🛑:What you will need is a discord bot, a discord application, and a server.
+You will need is a discord application, and a bot within said application. You will also need a server, and a role to be given to users that verify. You will also need a way to host the API. We recommend a VPS from [this seller](https://bit.ly/vpsshop).
 
 
 # 🛑IMPORTANT NOTICE🛑
@@ -26,75 +25,64 @@ Once we have our application set up, we are gonna click on OAuth2, here we will 
 
 ![opera_vXfFJ1nWUU](https://user-images.githubusercontent.com/70100389/147709519-9332234a-b11f-43cc-abdc-06a970e97389.png)
 
-At last we are gonna need a bot token watch [this on how to make a bot](https://youtu.be/dCkYje6B-io)
+Finally, we are going to need a bot token. Watch [this](https://youtu.be/dCkYje6B-io) video if you need help.
 
 ## Redirect
 
-Now we are gonna add the redirect. Press on Add Redirect and paste: https://yourdomainhere.com/discordauth
-AND NOW SAVE IT!!!!!
-![opera_f22iKehJjl](https://user-images.githubusercontent.com/70100389/147709654-c2eb9cb7-6e96-4823-8c46-33add2f3a75c.png)
-For now, we are done here.
+Now, we need to allow a redirect to our domain/api.
+Add a new redirect for the following:
+- https://yourdomainhere.com/discordauth
+- http://yourdomainhere.com/discordauth
+Obviously, replace `yourdomainhere.com` with your own domain/ip.
 
-## Installation FLASK API PART 1
-This will be very easy
+![opera_f22iKehJjl](https://user-images.githubusercontent.com/70100389/147709654-c2eb9cb7-6e96-4823-8c46-33add2f3a75c.png)
+We are done on the discord developers site for now.
+
+## PART 1 - Installation FLASK API 
 
 First install the requirements: 
+
 ```
 pip install -r requirements.txt
 ``` 
-, open up setup.py in there we will need to input 4 things: CLIENT_ID, CLIENT_SECRET, CLIENT_TOKEN (this is the bot token) , DOMAIN, welcome_channel, Member-role. 
+
+Then, open setup.py. It will ask you for the following: CLIENT_ID, CLIENT_SECRET, CLIENT_TOKEN (your bot's token), DOMAIN, Member-role (name of the role eg verified). 
+
+Say yes to running the API.
 
 
-If you want to test some stuff or add some go ahead but be sure to leave a like.
-Now it will ask you if you want to start the API say yes.
+## PART 2 - Installation DISCORD BOT
+INFO❗: This whole process is routed via the API (application.py), thus you can code the bot yourself.
 
-## Installation Discord bot PART 2
-INFO❗: You can make your own discord bot if you want this whole process is API-based so if you want you can even make a telegram bot whatever you wish suits you best.
-
-We are now going to open bot.py
-Now we are going to enter the domain the Bot will automaticly fetch all details. It will start after automatic.
-
+Change directories to the DISCORD BOT folder, then run bot.py
 ## Starting the system
-If you want you can copy the files to your server to run there or leave it on your PC
 
+You will need the program running 24/7, again, we recommend a VPS from [this seller](https://bit.ly/vpsshop).
 
-first, we are gonna make a flask server if you don't know how to [watch this](https://www.youtube.com/watch?v=goToXTC96Co&t=3266s) 
+First, run application.py
+Secondly, if you see no errors, move to the DISCORD BOT folder and run bot.py
 
+If no errors are shown, you are good to go! make sure your bot is in your server, and has administrator permissions. (also make sure it's role is at the top of the role list)
 
-After flask server deployment running your gonna run the bot:
-```bash
-python bot.py
-```
+Make sure to let @everyone only see a single channel where they cant type, and in said channel, write a message that goes along the lines of "Check your DMs with @(your bots name) to verify.".
 
-Now your all set.
-You will need to set your server so you can only see channels if you have the verified role
+To restore users who have verified:
+- restart the API (application.py) and the BOT
+- run `!restore YOURRESTOREKEY `
 
-To restore the users do:
-```
-!restore YOURRESTOREKEY YOUROLDSERVERID
-```
-Now all users will be back added.
+The bot will attempt to add back all users who have authorized and are in the database.
 
 # Endnote
-Please leave a like this took lots of time to code and it wasn't easy.
-If you have any questions dm me on discord:
-```
-haze#2603
-```
+Please **Star** this repo if you like it! This project has taken and continues to take lots of time! <3
+Add me if you need more help: `haze#2603`
 
-Have fun using this I hope it will help
 
-# Update roadmap
-These are the plans what I am trying to add.
+# Roadmap
+List of things i'm planning to add:
 
 - Web GUI for restoring/backuping the members
 - Telegram bot For restoring/backuping
-
-DONE:
-- Easier instalation, via batch or via linux instalation file
+- Command less verify (give roles as soon as user authorizes)
 
 # Advanced
-This is for the PRO coders
-You can edit the discordauth HTML template if you want. It is located in the folder template
-
-Also this system is API based so you can also make your own discord bot if you want.
+Feel free to modify this code, but remember to credit this repo.
