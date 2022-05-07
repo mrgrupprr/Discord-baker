@@ -164,11 +164,9 @@ def setup():
     r1 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'CLIENT_ID'})
     r3 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'bottoken'})
     r5 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'exchangepass'})
-    r6 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'welcomechannel'})
     r7 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'verifiedrole'})
     r8 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'restorekey'})
     config['botinfo']['bottoken'] = r3.text
-    config['botinfo']['welcome_channel'] = r6.text
     config['botinfo']['memberrole'] = r7.text
     config['botinfo']['therestorekey'] = r8.text
     config['botinfo']['exchangepass'] = r5.text
