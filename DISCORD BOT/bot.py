@@ -26,7 +26,6 @@ def fetchurlcorectly():
 
 #ignore this 
 token = str(config['botinfo']['bottoken'])
-welcome_channel = config['botinfo']['welcome_channel']
 memberrole = config['botinfo']['memberrole']
 clientid = config['botinfo']['client_id']
 therestorekey = config['botinfo']['therestorekey']
@@ -56,8 +55,6 @@ async def on_guild_join(guild):
 @bot.event
 async def on_member_join(member):
     server = bot.get_guild(int(member.guild.id))
-    channel = discord.utils.get(server.channels, id=int(welcome_channel))
-    await channel.send(f'Welcome {member.mention} to the {server} !.')
     if checkifverifydone(member.id, member.guild.id) == 'true':
         print('Verified')
         role = discord.utils.get(server.roles, name=memberrole)
