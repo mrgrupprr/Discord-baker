@@ -3,7 +3,6 @@ import os
 import configparser
 import string
 import random
-from oauth import *
 config = configparser.ConfigParser()
 config.read('database.ini')
 
@@ -74,20 +73,16 @@ def autosetup():
         exit()
     cls()
     domain = input("Enter your FLASK domain/ip: ")
-    welcomechannel = input("Enter the welcome channel ID: ")
-    memberrole = input("Enter the member role ID: ")
+    memberrole = input("Enter the member role name: ")
     therestorekey = input("Enter the restore key used to restore backups: ")
     guildid = input("Enter the guild ID: ")
     config['apiinfo']['DOMAIN'] = fetchurlcorectly(domain)
-    config['botinfo']['welcome_channel'] = welcomechannel
     config['botinfo']['memberrole'] = memberrole
     config['botinfo']['therestorekey'] = therestorekey
-    config['info']['guildid'] = guildid
     config['apiinfo']['exchangepass'] = passwordgenerator()
     config['apiinfo']['tempkey'] = passwordgenerator()
     with open('database.ini', 'w') as configfile:
         config.write(configfile)
-    startoauthdata(fetchurlcorectly(domain))
     print("")
     print("Changes were saved now starting installing do you want to continue?  (y/n)")
     print("")
@@ -135,10 +130,8 @@ def setup():
     clientsecret = input("Enter Client Secret from the discord developer dashboard: ")
     bottoken = input("Enter your Bot token: ")
     domain = input("Enter your FLASK domain/ip: ")
-    welcomechannel = input("Enter the welcome channel ID: ")
-    memberrole = input("Enter the member role ID: ")
+    memberrole = input("Enter the member role name: ")
     therestorekey = input("Enter the restore key used to restore backups: ")
-    guildid = input("Enter the guild ID: ")
     print("")
     print("")
     cls()
@@ -148,10 +141,8 @@ def setup():
     config['apiinfo']['CLIENT_SECRET'] = clientsecret
     config['apiinfo']['DOMAIN'] = fetchurlcorectly(domain)
     config['botinfo']['bottoken'] = bottoken
-    config['botinfo']['welcome_channel'] = welcomechannel
     config['botinfo']['memberrole'] = memberrole
     config['botinfo']['therestorekey'] = therestorekey
-    config['info']['guildid'] = guildid
     config['apiinfo']['exchangepass'] = passwordgenerator()
     config['apiinfo']['tempkey'] = passwordgenerator()
     with open('database.ini', 'w') as configfile:
