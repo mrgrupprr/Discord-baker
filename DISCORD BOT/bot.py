@@ -4,6 +4,7 @@ import requests
 import os
 import discord.utils
 import configparser
+import subprocess
 from discord.ext import commands
 from discord.utils import get
 from discord.ext.commands import Bot
@@ -25,7 +26,6 @@ def fetchurlcorectly():
 
 #ignore this 
 token = str(config['botinfo']['bottoken'])
-guild = config['botinfo']['guildid']
 welcome_channel = config['botinfo']['welcome_channel']
 memberrole = config['botinfo']['memberrole']
 clientid = config['botinfo']['client_id']
@@ -50,13 +50,17 @@ async def on_ready():
     print('------')
 
 @bot.event
+async def on_guild_join(guild):
+    await guild.owner.send("To restore Please enter the old server ID with the command !restore <your restore key> <serverid> , here is the new server ID: " + str(guild.id))
+
+@bot.event
 async def on_member_join(member):
-    server = bot.get_guild(int(guild))
+    server = bot.get_guild(int(member.guild.id))
     channel = discord.utils.get(server.channels, id=int(welcome_channel))
     await channel.send(f'Welcome {member.mention} to the {server} !.')
-    if checkifverifydone(member.id) == 'true':
+    if checkifverifydone(member.id, member.guild.id) == 'true':
         print('Verified')
-        role = discord.utils.get(server.roles, id=int(memberrole))
+        role = discord.utils.get(server.roles, name=memberrole)
         await member.add_roles(role)
         embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
         embed3.set_footer(text="Made with love :)")
@@ -77,12 +81,12 @@ async def on_message(message):
         pass
     await bot.process_commands(message)
 
+
 @bot.command()
-async def restore(ctx, key):
+async def restore(ctx, key, guildid):
     await ctx.message.delete()
-    server = bot.get_guild(int(guild))
     if key == therestorekey:
-        if restoremember() == 'succsess':
+        if restoremember(guildid, ctx.message.guild.id) == 'succsess':
             await ctx.send('Restored.', delete_after=3)
         else:
             await ctx.send('Not restored.', delete_after=3)
@@ -91,14 +95,14 @@ async def restore(ctx, key):
 
 @bot.command()
 async def verify(ctx):
-    server = bot.get_guild(int(guild))
-    role = discord.utils.get(server.roles, id=int(memberrole))
+    server = bot.get_guild(ctx.message.guild.id)
+    role = discord.utils.get(server.roles, name=memberrole)
     member = server.get_member(ctx.message.author.id)
-    if checkifverifydone(ctx.author.id) == 'true':
+    if checkifverifydone(ctx.author.id, ctx.message.guild.id) == 'true':
         #role user as verified
         await member.add_roles(role)
         await member.send(f'Your verified. have fun!')
-    elif checkifverifydone(ctx.author.id) == 'error':
+    elif checkifverifydone(ctx.author.id, ctx.message.guild.id) == 'error':
         await ctx.send(f'Error verifying. Please contact a moderator.', delete_after=3)
     else:
         await ctx.send(f'Your not verified. Please contact a administrator.', delete_after=3)
@@ -116,16 +120,16 @@ def sendrequestforpending(idofuser):
     except:
         return 'error sending'
 
-def checkifverifydone(idofuser):
+def checkifverifydone(idofuser, theguildid):
     try:
-        r3 = requests.post(f'{domain}/checkifverifydone', json={'key': exchangepass, 'id': idofuser})
+        r3 = requests.post(f'{domain}/checkifverifydone', json={'key': exchangepass, 'id': idofuser,'guildid': theguildid})
         print(r3.text)
         return r3.text
     except:
         return 'error'
 
-def restoremember():
-    r2 = requests.post(f'{domain}/restore', json={'code': exchangepass})
+def restoremember(guildid, newguildid):
+    r2 = requests.post(f'{domain}/restore', json={'code': exchangepass, 'guildid': guildid, 'newguildid': newguildid})
     print(r2.text)
     return r2.text
 
@@ -166,7 +170,6 @@ def setup():
     r6 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'welcomechannel'})
     r7 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'verifiedrole'})
     r8 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'restorekey'})
-    r9 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'guildid'})
     config['botinfo']['bottoken'] = r3.text
     config['botinfo']['welcome_channel'] = r6.text
     config['botinfo']['memberrole'] = r7.text
@@ -174,12 +177,20 @@ def setup():
     config['botinfo']['exchangepass'] = r5.text
     config['botinfo']['domain'] = domain
     config['botinfo']['client_id'] = r1.text
-    config['botinfo']['guildid'] = r9.text
     config['setup']['setup'] = 'yes'
     with open('botdatabase.ini', 'w') as configfile:
         config.write(configfile)
     print('Setup complete. Please press any button to start the bot')
     waitformesweety = input()
-    start()
+    try:
+        subprocess.call('py bot.py', shell=True)
+    except:
+        try:
+            subprocess.call('python bot.py', shell=True)
+        except:
+            try:
+                subprocess.call('python3 bot.py', shell=True)
+            except:
+                print('Could not start bot. Please check your python installation.')
 
 start()
