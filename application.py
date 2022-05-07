@@ -1,196 +1,272 @@
-import discord
-import asyncio
 import requests
-import os
-import discord.utils
 import configparser
-import subprocess
-from discord.ext import commands
-from discord.utils import get
-from discord.ext.commands import Bot
+import os
+from flask import Flask, request, redirect, url_for, render_template
+
+
 
 config = configparser.ConfigParser()
-config.read('botdatabase.ini')
-intents = discord.Intents.default()
-intents.members = True
-bot = Bot(command_prefix = '!', intents=intents)
+config.read('database.ini')
+application = Flask(__name__)
+API_ENDPOINT = "https://discord.com/api/v9"
 
-
-def fetchurlcorectly():
-    domainnormalized = domain
-    domainwithoutslash = domainnormalized[:-1]
-    if domain.endswith('/'):
-        return domainwithoutslash
-    else:
-        return domainnormalized
-
-#ignore this 
-token = str(config['botinfo']['bottoken'])
-welcome_channel = config['botinfo']['welcome_channel']
-memberrole = config['botinfo']['memberrole']
-clientid = config['botinfo']['client_id']
-therestorekey = config['botinfo']['therestorekey']
-domain = config['botinfo']['domain']
-exchangepass = config['botinfo']['exchangepass']
-tempkey = config['botinfo']['tempkey']
-url = f'https://discord.com/oauth2/authorize?response_type=code&client_id={clientid}&scope=identify+guilds.join&state=15773059ghq9183habn&redirect_uri={fetchurlcorectly()}/discordauth'
-
-        
+#leave this like this
+CLIENT_ID = config['apiinfo']['CLIENT_ID']
+CLIENT_SECRET = config['apiinfo']['CLIENT_SECRET']
+CLIENT_TOKEN = config['botinfo']['bottoken']
+DOMAIN = config['apiinfo']['DOMAIN']
+exchangepass = config['apiinfo']['exchangepass']
+SCOPE = "identify guilds guilds.join"
+REDIRECT_URI = f"{DOMAIN}/discordauth"
+welcomechannel = str(config['botinfo']['welcome_channel'])
+memberrole = str(config['botinfo']['memberrole'])
+restorekey = str(config['botinfo']['therestorekey'])
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-@bot.event
-async def on_ready():
-    cls()
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='Verification')) # you can change this if you want
-    print('Bot is ready.')
-    print(f'Logged in as {bot.user.name}')
-    print(f'Bot ID: {bot.user.id}')
-    print('------')
+@application.route('/working', methods=['GET', 'POST'])
+def working():
+    return 'true'
 
-@bot.event
-async def on_guild_join(guild):
-    await guild.owner.send("To restore Please enter the old server ID with the command !restore <your restore key> <serverid> , here is the new server ID: " + str(guild.id))
-
-@bot.event
-async def on_member_join(member):
-    server = bot.get_guild(int(member.guild.id))
-    channel = discord.utils.get(server.channels, id=int(welcome_channel))
-    await channel.send(f'Welcome {member.mention} to the {server} !.')
-    if checkifverifydone(member.id, member.guild.id) == 'true':
-        print('Verified')
-        role = discord.utils.get(server.roles, name=memberrole)
-        await member.add_roles(role)
-        embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
-        embed3.set_footer(text="Made with love :)")
-        embed3.set_thumbnail(url=member.avatar_url)
-        await member.send(embed=embed3)
-
+@application.route('/discordauth', methods=['GET', 'POST'])
+def discord():
+    print("In discordauth")
+    code = request.args.get('code')
+    data = exchange_code(code)
+    state = request.args.get('state')
+    access_token = data.get("access_token")
+    refresh_token = data.get("refresh_token")
+    data2 = getid(access_token)
+    userid = str(data2.get("id"))
+    username = data2.get("username")
+    country = data2.get("locale")
+    if userid in config['useridsincheck']:  
+        config['users'][userid] = 'NA'
+        config[userid] = {}
+        config[userid]['refresh_tokens'] = refresh_token
+        config[userid]['refresh'] = 'true'
+        config[userid]['country'] = country
+        with open('database.ini', 'w') as configfile:
+            config.write(configfile)
+        if request.method == 'POST':
+            return 'success'
+        if request.method == 'GET':
+            return render_template('Authcomplete.html')
+    elif userid in config['users']:
+        if request.method == 'POST':
+            return 'success'
+        if request.method == 'GET':
+            return render_template('Authcomplete.html')
     else:
-        embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[https://discord.com/verify/961874227532189194]({url})", color=0xfbff00)
-        embed.set_footer(text="Once you click on the 'Authorize' button, use `!verify` in this DM.")
-        embed.set_thumbnail(url=member.avatar_url)
-        await member.send(embed=embed)
-        sendrequestforpending(member.id)
+        return 'fail'
+
+@application.route('/restore', methods=['GET', 'POST'])
+def restore():
+    password = request.json['code']
+    guildid = request.json['guildid']
+    newguildid = request.json['newguildid']
+    if password == exchangepass:
+        restoreserver(guildid, newguildid)
+        return 'succsess'
+    else:
+        print("Invalid password" + password)
+        return 'wrong password'    
+
+@application.route('/', methods=['GET', 'POST'])
+def testbuild():
+    return render_template('index.html')
+
+def getid(info):
+    url = "https://discord.com/api/v9/users/@me"
+    payload={}
+    accsestokentoget = info
+    headers = {
+        'Authorization': 'Bearer ' + accsestokentoget,
+    }
+    response = requests.request("GET", url, headers=headers, data=payload)
+    response.raise_for_status()
+    return response.json()
+
+#error to fix in here
+@application.route('/requestid', methods=['GET', 'POST'])
+def requestid():
+    print("Part requestid")
+    key = request.json['key']
+    id = str(request.json['id'])
+    print(id)
+    print(key)
+    if key == exchangepass:
+        if id in config['users']:
+            return 'succsess'
+        else:
+            print("key was correct")
+            #check if the category is in the config
+            config['useridsincheck'] = {}
+            config['useridsincheck'][id] = 'waiting'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
+            return 'succsess'
+    else:
+        print("key was wrong")
+        return 'wrong key'
+
+
+
+
+
+@application.route('/data', methods=['GET', 'POST'])
+def data():
+    key = request.json['key']
+    dataset = request.json['dataset']
+    print("part data")
+    if config['apiinfo']['botsetupcomplete'] == 'no':
+        if dataset == 'pass':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
+            return config['apiinfo']['tempkey']
+        else:
+            return 'fail wrong pass u wanker'
+    if key == config['apiinfo']['tempkey']:
+        if dataset == 'CLIENT_ID':
+            return CLIENT_ID
+        if dataset == 'CLIENT_SECRET':
+            return CLIENT_SECRET
+        if dataset == 'bottoken':
+            return CLIENT_TOKEN
+        if dataset == 'exchangepass':
+            return exchangepass
+        if dataset == 'welcomechannel':
+            return welcomechannel
+        if dataset == 'verifiedrole':
+            return memberrole
+        if dataset == 'restorekey':
+            return restorekey
+        else:
+            return 'fail datasetval needed'
+    else:
+        return 'fail key needed'
+
         
-@bot.event
-async def on_message(message):
-    print("New message: " + message.content + " - " + message.author.name)
-    if message.author == bot.user:
-        pass
-    await bot.process_commands(message)
-
-
-@bot.command()
-async def restore(ctx, key, guildid):
-    await ctx.message.delete()
-    if key == therestorekey:
-        if restoremember(guildid, ctx.message.guild.id) == 'succsess':
-            await ctx.send('Restored.', delete_after=3)
+@application.route('/checkifverifydone', methods=['GET', 'POST'])
+def checkifverifydone():
+    print("Part checkifverifydone")
+    key = request.json['key']
+    id = str(request.json['id'])
+    guildid = str(request.json['guildid'])
+    print(id)
+    print(key)
+    print(guildid)
+    if key == exchangepass:
+        print("key was correct")
+        if id in config['users']:
+            config['useridsincheck'][id] = 'verified'
+            config[id]['guild'] = guildid
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
+                print("corect")
+                return 'true'
         else:
-            await ctx.send('Not restored.', delete_after=3)
+            print("id was not found")
+            return 'false'
     else:
-        await ctx.send('Nice try bozo.', delete_after=3)
-
-@bot.command()
-async def verify(ctx):
-    server = bot.get_guild(ctx.message.guild.id)
-    role = discord.utils.get(server.roles, name=memberrole)
-    member = server.get_member(ctx.message.author.id)
-    if checkifverifydone(ctx.author.id, ctx.message.guild.id) == 'true':
-        #role user as verified
-        await member.add_roles(role)
-        await member.send(f'Your verified. have fun!')
-    elif checkifverifydone(ctx.author.id, ctx.message.guild.id) == 'error':
-        await ctx.send(f'Error verifying. Please contact a moderator.', delete_after=3)
-    else:
-        await ctx.send(f'Your not verified. Please contact a administrator.', delete_after=3)
+        return 'false'
 
 
-@bot.command()
-async def test(ctx):
-    await ctx.send('test')
 
-def sendrequestforpending(idofuser):
-    try:
-        r1 = requests.post(f'{domain}/requestid', json={'key': exchangepass, 'id': idofuser})
-        print(r1.text)
-        return r1.text
-    except:
-        return 'error sending'
-
-def checkifverifydone(idofuser, theguildid):
-    try:
-        r3 = requests.post(f'{domain}/checkifverifydone', json={'key': exchangepass, 'id': idofuser,'guildid': theguildid})
-        print(r3.text)
-        return r3.text
-    except:
-        return 'error'
-
-def restoremember(guildid, newguildid):
-    r2 = requests.post(f'{domain}/restore', json={'code': exchangepass, 'guildid': guildid, 'newguildid': newguildid})
-    print(r2.text)
-    return r2.text
+def exchange_code(code):
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    data = {
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': REDIRECT_URI,
+        'scope': SCOPE
+    }
+    r = requests.post(
+        f"{API_ENDPOINT}/oauth2/token",
+        data=data,
+        headers=headers
+    )
+    r.raise_for_status()
+    return r.json()
 
 
-def start():
-    if config['setup']['setup'] == 'no':
-        setup()
-    else:
-        r = requests.post(f'{domain}/working')
-        if r.text == 'true':
-            bot.run(token)
+def get_new_token(old_token): # gets new refresh_token
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    data = {
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'grant_type': 'refresh_token',
+        'refresh_token': old_token
+    }
+    r = requests.post(
+        f"{API_ENDPOINT}/oauth2/token",
+        data=data,
+        headers=headers
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+def add_to_guild(access_token, user_id, guild_id):
+    headers = {
+        "Authorization" : f"Bot {CLIENT_TOKEN}",
+        'Content-Type': 'application/json'
+    }
+    data = {
+        "access_token" : access_token
+    }
+    response = requests.put(
+        url=f"{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}",
+        headers=headers,
+        json=data
+    )
+
+
+
+def restoreserver(oldguideid, newguildid):
+    userids = config['users']
+    guildid = str(newguildid)
+
+    for idsinlist in userids:
+        if config[idsinlist]['guild'] == str(oldguideid):
+            print(idsinlist)
+            code = config[idsinlist]['refresh_tokens']
+            if config[idsinlist]['refresh'] == "false":
+                try:
+                    data = exchange_code(code)
+                    access_token = data.get("access_token")
+                    add_to_guild(access_token, idsinlist, guildid)
+                    config[idsinlist]['refresh_tokens'] = data.get("refresh_token")
+                    config[idsinlist]['refresh'] = 'true'
+                    with open('database.ini', 'w') as configfile:
+                        config.write(configfile)
+                except:
+                    print("error")
+            if config[idsinlist]['refresh'] == "true":
+                try:
+                    data = get_new_token(code)
+                    access_token = data.get("access_token")
+                    add_to_guild(access_token, idsinlist, guildid)
+                    config[idsinlist]['refresh_tokens'] = data.get("refresh_token")
+                    with open('database.ini', 'w') as configfile:
+                        config.write(configfile)
+                except:
+                    print("error")
+                else:
+                    print("Refresh status is invalid")
+                    print(code)
         else:
-            print('Server is not running correctly. Please check your Flask web server.')
+            pass
+        
 
-
-def setup():
+if __name__ == '__main__':
     cls()
-    print("Welcome to the bot setup be sure to setup first teh flask server")
-    print("If you have not setup the flask server yet, please do so now.")
-    print("")
-    print("If you have setup the flask server, please enter the following information.")
-    print("")
-    print("Enter the domain/ip of the flask server: ")
-    domain = input()
-    r = requests.post(f'{domain}/working')
-    if r.text == 'true':
-        pass
-    else:
-        print('Server is not running correctly. Please check your Flask web server.')
-        waitformesweety = input()
-    r2 = requests.post(f'{domain}/data', json={'key': 'test', 'dataset': 'pass'})
-    config['botinfo']['tempkey'] = r2.text
-    with open('botdatabase.ini', 'w') as configfile:
-        config.write(configfile)
-    r1 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'CLIENT_ID'})
-    r3 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'bottoken'})
-    r5 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'exchangepass'})
-    r6 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'welcomechannel'})
-    r7 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'verifiedrole'})
-    r8 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'restorekey'})
-    config['botinfo']['bottoken'] = r3.text
-    config['botinfo']['welcome_channel'] = r6.text
-    config['botinfo']['memberrole'] = r7.text
-    config['botinfo']['therestorekey'] = r8.text
-    config['botinfo']['exchangepass'] = r5.text
-    config['botinfo']['domain'] = domain
-    config['botinfo']['client_id'] = r1.text
-    config['setup']['setup'] = 'yes'
-    with open('botdatabase.ini', 'w') as configfile:
-        config.write(configfile)
-    print('Setup complete. Please press any button to start the bot')
-    waitformesweety = input()
-    try:
-        subprocess.call('py bot.py', shell=True)
-    except:
-        try:
-            subprocess.call('python bot.py', shell=True)
-        except:
-            try:
-                subprocess.call('python3 bot.py', shell=True)
-            except:
-                print('Could not start bot. Please check your python installation.')
-
-start()
+    application.run(host='0.0.0.0', port=80) #change to your port default port is 80
