@@ -94,11 +94,11 @@ async def verify(ctx):
     server = bot.get_guild(int(guild))
     role = discord.utils.get(server.roles, id=int(memberrole))
     member = server.get_member(ctx.message.author.id)
-    if checkifverifydone(ctx.author.id) == 'true':
+    if checkifverifydone(ctx.message.author.id) == 'true':
         #role user as verified
         await member.add_roles(role)
         await member.send(f'Your verified. have fun!')
-    elif checkifverifydone(ctx.author.id) == 'error':
+    elif checkifverifydone(ctx.message.author.id) == 'error':
         await ctx.send(f'Error verifying. Please contact a moderator.', delete_after=3)
     else:
         await ctx.send(f'Your not verified. Please contact a administrator.', delete_after=3)
