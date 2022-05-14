@@ -18,8 +18,10 @@ DOMAIN = config['apiinfo']['DOMAIN']
 exchangepass = config['apiinfo']['exchangepass']
 SCOPE = "identify guilds guilds.join"
 REDIRECT_URI = f"{DOMAIN}/discordauth"
+welcomechannel = str(config['botinfo']['welcome_channel'])
 memberrole = str(config['botinfo']['memberrole'])
 restorekey = str(config['botinfo']['therestorekey'])
+guildid = config['info']['guildid']
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -63,10 +65,8 @@ def discord():
 @application.route('/restore', methods=['GET', 'POST'])
 def restore():
     password = request.json['code']
-    guildid = request.json['guildid']
-    newguildid = request.json['newguildid']
     if password == exchangepass:
-        restoreserver(guildid, newguildid)
+        restoreserver()
         return 'succsess'
     else:
         print("Invalid password" + password)
@@ -127,15 +127,19 @@ def data():
             return config['apiinfo']['tempkey']
         else:
             return 'fail wrong pass u wanker'
-    if key == config['apiinfo']['tempkey']:
+    elif key == config['apiinfo']['tempkey']:
         if dataset == 'CLIENT_ID':
             return CLIENT_ID
+        if dataset == 'guildid':
+            return guildid
         if dataset == 'CLIENT_SECRET':
             return CLIENT_SECRET
         if dataset == 'bottoken':
             return CLIENT_TOKEN
         if dataset == 'exchangepass':
             return exchangepass
+        if dataset == 'welcomechannel':
+            return welcomechannel
         if dataset == 'verifiedrole':
             return memberrole
         if dataset == 'restorekey':
@@ -151,15 +155,12 @@ def checkifverifydone():
     print("Part checkifverifydone")
     key = request.json['key']
     id = str(request.json['id'])
-    guildid = str(request.json['guildid'])
     print(id)
     print(key)
-    print(guildid)
     if key == exchangepass:
         print("key was correct")
         if id in config['users']:
             config['useridsincheck'][id] = 'verified'
-            config[id]['guild'] = guildid
             with open('database.ini', 'w') as configfile:
                 config.write(configfile)
                 print("corect")
@@ -228,40 +229,37 @@ def add_to_guild(access_token, user_id, guild_id):
 
 
 
-def restoreserver(oldguideid, newguildid):
+def restoreserver():
     userids = config['users']
-    guildid = str(newguildid)
+    guildid = config['info']['guildid']
 
     for idsinlist in userids:
-        if config[idsinlist]['guild'] == str(oldguideid):
-            print(idsinlist)
-            code = config[idsinlist]['refresh_tokens']
-            if config[idsinlist]['refresh'] == "false":
-                try:
-                    data = exchange_code(code)
-                    access_token = data.get("access_token")
-                    add_to_guild(access_token, idsinlist, guildid)
-                    config[idsinlist]['refresh_tokens'] = data.get("refresh_token")
-                    config[idsinlist]['refresh'] = 'true'
-                    with open('database.ini', 'w') as configfile:
-                        config.write(configfile)
-                except:
-                    print("error")
-            if config[idsinlist]['refresh'] == "true":
-                try:
-                    data = get_new_token(code)
-                    access_token = data.get("access_token")
-                    add_to_guild(access_token, idsinlist, guildid)
-                    config[idsinlist]['refresh_tokens'] = data.get("refresh_token")
-                    with open('database.ini', 'w') as configfile:
-                        config.write(configfile)
-                except:
-                    print("error")
-                else:
-                    print("Refresh status is invalid")
-                    print(code)
+        print(idsinlist)
+        code = config[idsinlist]['refresh_tokens']
+        if config[idsinlist]['refresh'] == "false":
+            try:
+                data = exchange_code(code)
+                access_token = data.get("access_token")
+                add_to_guild(access_token, idsinlist, guildid)
+                config[idsinlist]['refresh_tokens'] = data.get("refresh_token")
+                config[idsinlist]['refresh'] = 'true'
+                with open('database.ini', 'w') as configfile:
+                    config.write(configfile)
+            except:
+                print("error")
+        if config[idsinlist]['refresh'] == "true":
+            try:
+                data = get_new_token(code)
+                access_token = data.get("access_token")
+                add_to_guild(access_token, idsinlist, guildid)
+                config[idsinlist]['refresh_tokens'] = data.get("refresh_token")
+                with open('database.ini', 'w') as configfile:
+                    config.write(configfile)
+            except:
+                print("error")
         else:
-            pass
+            print("Refresh status is invalid")
+            print(code)
         
 
 if __name__ == '__main__':
