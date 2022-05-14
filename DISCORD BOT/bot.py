@@ -4,7 +4,6 @@ import requests
 import os
 import discord.utils
 import configparser
-import subprocess
 from discord.ext import commands
 from discord.utils import get
 from discord.ext.commands import Bot
@@ -26,6 +25,8 @@ def fetchurlcorectly():
 
 #ignore this 
 token = str(config['botinfo']['bottoken'])
+guild = config['botinfo']['guildid']
+welcome_channel = config['botinfo']['welcome_channel']
 memberrole = config['botinfo']['memberrole']
 clientid = config['botinfo']['client_id']
 therestorekey = config['botinfo']['therestorekey']
@@ -49,15 +50,13 @@ async def on_ready():
     print('------')
 
 @bot.event
-async def on_guild_join(guild):
-    await guild.owner.send("To restore Please enter the old server ID with the command !restore <your restore key> <serverid> , here is the new server ID: " + str(guild.id))
-
-@bot.event
 async def on_member_join(member):
-    server = bot.get_guild(int(member.guild.id))
-    if checkifverifydone(member.id, member.guild.id) == 'true':
+    server = bot.get_guild(int(guild))
+    channel = discord.utils.get(server.channels, id=int(welcome_channel))
+    await channel.send(f'Welcome {member.mention} to the {server} !.')
+    if checkifverifydone(member.id) == 'true':
         print('Verified')
-        role = discord.utils.get(server.roles, name=memberrole)
+        role = discord.utils.get(server.roles, id=int(memberrole))
         await member.add_roles(role)
         embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
         embed3.set_footer(text="Made with love :)")
@@ -69,7 +68,7 @@ async def on_member_join(member):
         embed.set_footer(text="Once you click on the 'Authorize' button, use `!verify` in this DM.")
         embed.set_thumbnail(url=member.avatar_url)
         await member.send(embed=embed)
-        sendrequestforpending(member.id, member.guild.id)
+        sendrequestforpending(member.id)
         
 @bot.event
 async def on_message(message):
@@ -78,12 +77,12 @@ async def on_message(message):
         pass
     await bot.process_commands(message)
 
-
 @bot.command()
-async def restore(ctx, key, guildid):
+async def restore(ctx, key):
     await ctx.message.delete()
+    server = bot.get_guild(int(guild))
     if key == therestorekey:
-        if restoremember(guildid, ctx.message.guild.id) == 'succsess':
+        if restoremember() == 'succsess':
             await ctx.send('Restored.', delete_after=3)
         else:
             await ctx.send('Not restored.', delete_after=3)
@@ -92,14 +91,14 @@ async def restore(ctx, key, guildid):
 
 @bot.command()
 async def verify(ctx):
-    server = bot.get_guild(int(config['memberids'][str(ctx.author.id)]))
-    role = discord.utils.get(server.roles, name=memberrole)
+    server = bot.get_guild(int(guild))
+    role = discord.utils.get(server.roles, id=int(memberrole))
     member = server.get_member(ctx.message.author.id)
-    if checkifverifydone(ctx.author.id, config['memberids'][str(ctx.author.id)]) == 'true':
+    if checkifverifydone(ctx.author.id) == 'true':
         #role user as verified
         await member.add_roles(role)
         await member.send(f'Your verified. have fun!')
-    elif checkifverifydone(ctx.author.id, config['memberids'][str(ctx.author.id)]) == 'error':
+    elif checkifverifydone(ctx.author.id) == 'error':
         await ctx.send(f'Error verifying. Please contact a moderator.', delete_after=3)
     else:
         await ctx.send(f'Your not verified. Please contact a administrator.', delete_after=3)
@@ -109,10 +108,7 @@ async def verify(ctx):
 async def test(ctx):
     await ctx.send('test')
 
-def sendrequestforpending(idofuser, guildid):
-    config['memberids'][str(idofuser)] = str(guildid)
-    with open('botdatabase.ini', 'w') as configfile:
-        config.write(configfile)
+def sendrequestforpending(idofuser):
     try:
         r1 = requests.post(f'{domain}/requestid', json={'key': exchangepass, 'id': idofuser})
         print(r1.text)
@@ -120,16 +116,16 @@ def sendrequestforpending(idofuser, guildid):
     except:
         return 'error sending'
 
-def checkifverifydone(idofuser, theguildid):
+def checkifverifydone(idofuser):
     try:
-        r3 = requests.post(f'{domain}/checkifverifydone', json={'key': exchangepass, 'id': idofuser,'guildid': theguildid})
+        r3 = requests.post(f'{domain}/checkifverifydone', json={'key': exchangepass, 'id': idofuser})
         print(r3.text)
         return r3.text
     except:
         return 'error'
 
-def restoremember(guildid, newguildid):
-    r2 = requests.post(f'{domain}/restore', json={'code': exchangepass, 'guildid': guildid, 'newguildid': newguildid})
+def restoremember():
+    r2 = requests.post(f'{domain}/restore', json={'code': exchangepass})
     print(r2.text)
     return r2.text
 
@@ -167,28 +163,23 @@ def setup():
     r1 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'CLIENT_ID'})
     r3 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'bottoken'})
     r5 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'exchangepass'})
+    r6 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'welcomechannel'})
     r7 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'verifiedrole'})
     r8 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'restorekey'})
+    r9 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'guildid'})
     config['botinfo']['bottoken'] = r3.text
+    config['botinfo']['welcome_channel'] = r6.text
     config['botinfo']['memberrole'] = r7.text
     config['botinfo']['therestorekey'] = r8.text
     config['botinfo']['exchangepass'] = r5.text
     config['botinfo']['domain'] = domain
     config['botinfo']['client_id'] = r1.text
+    config['botinfo']['guildid'] = r9.text
     config['setup']['setup'] = 'yes'
     with open('botdatabase.ini', 'w') as configfile:
         config.write(configfile)
     print('Setup complete. Please press any button to start the bot')
     waitformesweety = input()
-    try:
-        subprocess.call('py bot.py', shell=True)
-    except:
-        try:
-            subprocess.call('python bot.py', shell=True)
-        except:
-            try:
-                subprocess.call('python3 bot.py', shell=True)
-            except:
-                print('Could not start bot. Please check your python installation.')
+    start()
 
 start()
