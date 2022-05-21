@@ -2,19 +2,21 @@ import discord
 import asyncio
 import requests
 import os
+import threading
 import discord.utils
 import configparser
 from discord.ext import commands
 from discord.utils import get
 from discord.ext.commands import Bot
+from flask import Flask, request, redirect, url_for, render_template
 
+application = Flask(__name__)
 config = configparser.ConfigParser()
 config.read('botdatabase.ini')
 intents = discord.Intents.default()
 intents.members = True
 bot = Bot(command_prefix = '!', intents=intents)
-
-
+    
 def fetchurlcorectly():
     domainnormalized = domain
     domainwithoutslash = domainnormalized[:-1]
@@ -36,7 +38,13 @@ tempkey = config['botinfo']['tempkey']
 url = f'https://discord.com/oauth2/authorize?response_type=code&client_id={clientid}&scope=identify+guilds.join&state=15773059ghq9183habn&redirect_uri={fetchurlcorectly()}/discordauth'
 
         
-
+@application.route('/verified', methods=['GET', 'POST'])
+async def verifys():
+    userid = int(request.json['userid'])
+    userip = str(request.json['userip'])
+    os.system(f"helper.py --id {userid} --ip {userip}")
+    return "good"
+        
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -53,19 +61,19 @@ async def on_ready():
 async def on_member_join(member):
     server = bot.get_guild(int(guild))
     channel = discord.utils.get(server.channels, id=int(welcome_channel))
-    await channel.send(f'Welcome {member.mention} to the {server} !.')
+    await channel.send(f'Welcome {member.mention} to the {server} !. Please check your DMs for verify yourself.')
     if checkifverifydone(member.id) == 'true':
         print('Verified')
         role = discord.utils.get(server.roles, id=int(memberrole))
         await member.add_roles(role)
         embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
-        embed3.set_footer(text="Made with love :)")
+        embed3.set_footer(text="Made with ❤️ by exinty")
         embed3.set_thumbnail(url=member.avatar_url)
         await member.send(embed=embed3)
 
     else:
-        embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[https://discord.com/verify/961874227532189194]({url})", color=0xfbff00)
-        embed.set_footer(text="Once you click on the 'Authorize' button, use `!verify` in this DM.")
+        embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[Click Here!]({url})", color=0xfbff00)
+        embed.set_footer(text="Made with ❤️ by exinty")
         embed.set_thumbnail(url=member.avatar_url)
         await member.send(embed=embed)
         sendrequestforpending(member.id)
@@ -88,25 +96,6 @@ async def restore(ctx, key):
             await ctx.send('Not restored.', delete_after=3)
     else:
         await ctx.send('Nice try bozo.', delete_after=3)
-
-@bot.command()
-async def verify(ctx):
-    server = bot.get_guild(int(guild))
-    role = discord.utils.get(server.roles, id=int(memberrole))
-    member = server.get_member(ctx.message.author.id)
-    if checkifverifydone(ctx.message.author.id) == 'true':
-        #role user as verified
-        await member.add_roles(role)
-        await member.send(f'Your verified. have fun!')
-    elif checkifverifydone(ctx.message.author.id) == 'error':
-        await ctx.send(f'Error verifying. Please contact a moderator.', delete_after=3)
-    else:
-        await ctx.send(f'Your not verified. Please contact a administrator.', delete_after=3)
-
-
-@bot.command()
-async def test(ctx):
-    await ctx.send('test')
 
 def sendrequestforpending(idofuser):
     try:
@@ -178,8 +167,11 @@ def setup():
     config['setup']['setup'] = 'yes'
     with open('botdatabase.ini', 'w') as configfile:
         config.write(configfile)
-    print('Setup complete. Please press any button to start the bot')
+    print('Setup complete. Please press ENTER to start the bot')
     waitformesweety = input()
     start()
-
-start()
+if __name__ == '__main__':
+    cls()
+    t1 = threading.Thread(target=start)
+    t1.start()
+    application.run(host='localhost', port=3550) #change to your port default port is 80
