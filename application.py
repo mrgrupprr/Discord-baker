@@ -4,13 +4,11 @@ import os
 from flask import Flask, request, redirect, url_for, render_template
 
 
-
 config = configparser.ConfigParser()
 config.read('database.ini')
 application = Flask(__name__)
 API_ENDPOINT = "https://discord.com/api/v9"
 
-#leave this like this
 CLIENT_ID = config['apiinfo']['CLIENT_ID']
 CLIENT_SECRET = config['apiinfo']['CLIENT_SECRET']
 CLIENT_TOKEN = config['botinfo']['bottoken']
@@ -53,11 +51,15 @@ def discord():
         if request.method == 'POST':
             return 'success'
         if request.method == 'GET':
+            jso1={"userid": userid,"userip": request.remote_addr}
+            r=requests.post("http://localhost:3550/verified",json=jso1)
             return render_template('Authcomplete.html')
     elif userid in config['users']:
         if request.method == 'POST':
             return 'success'
         if request.method == 'GET':
+            jso1={"userid": userid,"userip": request.remote_addr}
+            r=requests.post("http://localhost:3550/verified",json=jso1)
             return render_template('Authcomplete.html')
     else:
         return 'fail'
@@ -171,8 +173,6 @@ def checkifverifydone():
     else:
         return 'false'
 
-
-
 def exchange_code(code):
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -261,7 +261,6 @@ def restoreserver():
             print("Refresh status is invalid")
             print(code)
         
-
 if __name__ == '__main__':
     cls()
     application.run(host='0.0.0.0', port=80) #change to your port default port is 80
