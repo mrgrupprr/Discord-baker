@@ -7,6 +7,9 @@ import discord.utils
 import configparser
 from discord.ext import commands
 from discord.utils import get
+from discord.ext import commands
+from discord import Option
+from discord.commands import slash_command
 from discord.ext.commands import Bot
 from flask import Flask, request, redirect, url_for, render_template
 
@@ -60,11 +63,11 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     server = bot.get_guild(int(guild))
+    role = discord.utils.get(server.roles, id=int(memberrole))
     channel = discord.utils.get(server.channels, id=int(welcome_channel))
     await channel.send(f'Welcome {member.mention} to the {server} !. Please check your DMs for verify yourself.')
     if checkifverifydone(member.id) == 'true':
         print('Verified')
-        role = discord.utils.get(server.roles, id=int(memberrole))
         await member.add_roles(role)
         embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
         embed3.set_footer(text="Made with ❤️ by exinty")
@@ -85,17 +88,19 @@ async def on_message(message):
         pass
     await bot.process_commands(message)
 
-@bot.command()
-async def restore(ctx, key):
-    await ctx.message.delete()
-    server = bot.get_guild(int(guild))
+@bot.slash_command(guild_ids=[971119590346203167], name='restore', aliases=['restore'], description='Restore`s all of the users.')
+async def restore(
+    ctx,
+    key: Option(str, "Enter your Restore key.", required=True),
+):
     if key == therestorekey:
+        await ctx.respond('Starting restore process!', ephemeral=True)
         if restoremember() == 'succsess':
-            await ctx.send('Restored.', delete_after=3)
+            await ctx.author.send('Restore process is done!')
         else:
-            await ctx.send('Not restored.', delete_after=3)
+            await ctx.author.send('Not restored.')
     else:
-        await ctx.send('Nice try bozo.', delete_after=3)
+        await ctx.respond('Key is wrong!', ephemeral=True)
 
 def sendrequestforpending(idofuser):
     try:
@@ -145,17 +150,13 @@ def setup():
     else:
         print('Server is not running correctly. Please check your Flask web server.')
         waitformesweety = input()
-    r2 = requests.post(f'{domain}/data', json={'key': 'test', 'dataset': 'pass'})
-    config['botinfo']['tempkey'] = r2.text
-    with open('botdatabase.ini', 'w') as configfile:
-        config.write(configfile)
-    r1 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'CLIENT_ID'})
-    r3 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'bottoken'})
-    r5 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'exchangepass'})
-    r6 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'welcomechannel'})
-    r7 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'verifiedrole'})
-    r8 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'restorekey'})
-    r9 = requests.post(f'{domain}/data', json={'key': tempkey, 'dataset': 'guildid'})
+    r1 = requests.post(f'{domain}/data', json={'dataset': 'CLIENT_ID'})
+    r3 = requests.post(f'{domain}/data', json={'dataset': 'bottoken'})
+    r5 = requests.post(f'{domain}/data', json={'dataset': 'exchangepass'})
+    r6 = requests.post(f'{domain}/data', json={'dataset': 'welcomechannel'})
+    r7 = requests.post(f'{domain}/data', json={'dataset': 'verifiedrole'})
+    r8 = requests.post(f'{domain}/data', json={'dataset': 'restorekey'})
+    r9 = requests.post(f'{domain}/data', json={'dataset': 'guildid'})
     config['botinfo']['bottoken'] = r3.text
     config['botinfo']['welcome_channel'] = r6.text
     config['botinfo']['memberrole'] = r7.text
@@ -167,9 +168,10 @@ def setup():
     config['setup']['setup'] = 'yes'
     with open('botdatabase.ini', 'w') as configfile:
         config.write(configfile)
-    print('Setup complete. Please press ENTER to start the bot')
+    print('Setup complete. Please restart the BOT')
     waitformesweety = input()
-    start()
+    quit()
+
 if __name__ == '__main__':
     cls()
     t1 = threading.Thread(target=start)
