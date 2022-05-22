@@ -73,14 +73,17 @@ def autosetup():
         exit()
     cls()
     domain = input("Enter your FLASK domain/ip: ")
-    memberrole = input("Enter the member role id: ")
+    memberrole = input("Enter the member role name: ")
+    welcomechannel = input("Enter the welcome channel id: ")
     therestorekey = input("Enter the restore key used to restore backups: ")
     guildid = input("Enter the guild ID: ")
     config['apiinfo']['DOMAIN'] = fetchurlcorectly(domain)
     config['botinfo']['memberrole'] = memberrole
+    config['botinfo']['welcome_channel'] = welcomechannel
     config['botinfo']['therestorekey'] = therestorekey
     config['apiinfo']['exchangepass'] = passwordgenerator()
     config['apiinfo']['tempkey'] = passwordgenerator()
+    config['botinfo']['guildid'] = guildid
     with open('database.ini', 'w') as configfile:
         config.write(configfile)
     print("")
@@ -130,8 +133,10 @@ def setup():
     clientsecret = input("Enter Client Secret from the discord developer dashboard: ")
     bottoken = input("Enter your Bot token: ")
     domain = input("Enter your FLASK domain/ip: ")
-    memberrole = input("Enter the member role id: ")
+    welcomechannel = input("Enter the welcome channel id: ")
+    memberrole = input("Enter the member role name: ")
     therestorekey = input("Enter the restore key used to restore backups: ")
+    guildid = input("Enter the guild ID: ")
     print("")
     print("")
     cls()
@@ -142,9 +147,11 @@ def setup():
     config['apiinfo']['DOMAIN'] = fetchurlcorectly(domain)
     config['botinfo']['bottoken'] = bottoken
     config['botinfo']['memberrole'] = memberrole
+    config['botinfo']['welcome_channel'] = welcomechannel
     config['botinfo']['therestorekey'] = therestorekey
     config['apiinfo']['exchangepass'] = passwordgenerator()
     config['apiinfo']['tempkey'] = passwordgenerator()
+    config['botinfo']['guildid'] = guildid
     with open('database.ini', 'w') as configfile:
         config.write(configfile)
     print("")
