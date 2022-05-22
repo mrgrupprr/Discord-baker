@@ -71,13 +71,11 @@ async def on_member_join(member):
         await member.add_roles(role)
         embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
         embed3.set_footer(text="Made with ❤️ by exinty")
-        embed3.set_thumbnail(url=member.avatar_url)
         await member.send(embed=embed3)
 
     else:
         embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[Click Here!]({url})", color=0xfbff00)
         embed.set_footer(text="Made with ❤️ by exinty")
-        embed.set_thumbnail(url=member.avatar_url)
         await member.send(embed=embed)
         sendrequestforpending(member.id)
         
@@ -88,7 +86,7 @@ async def on_message(message):
         pass
     await bot.process_commands(message)
 
-@bot.slash_command(guild_ids=[971119590346203167], name='restore', aliases=['restore'], description='Restore`s all of the users.')
+@bot.slash_command(guild_ids=[guild], name='restore', aliases=['restore'], description='Restore`s all of the users.')
 async def restore(
     ctx,
     key: Option(str, "Enter your Restore key.", required=True),
