@@ -11,6 +11,7 @@ TO USE MULTIPLE SERVERS THE VERIFIED ROLE NEEDS TO HAVE ON BOTH SERVERS THE SAME
 INSTALL THIS FIRST:
 ```batch
 pip install git+https://github.com/Pycord-Development/pycord
+pip install flask[async]
 ```
 
 # AUTOMATED Setup
