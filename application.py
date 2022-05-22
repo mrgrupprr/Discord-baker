@@ -118,38 +118,53 @@ def requestid():
 
 @application.route('/data', methods=['GET', 'POST'])
 def data():
-    key = request.json['key']
     dataset = request.json['dataset']
     print("part data")
     if config['apiinfo']['botsetupcomplete'] == 'no':
-        if dataset == 'pass':
+        if dataset == 'CLIENT_ID':
             config['apiinfo']['botsetupcomplete'] = 'yes'
             with open('database.ini', 'w') as configfile:
                 config.write(configfile)
-            return config['apiinfo']['tempkey']
-        else:
-            return 'fail wrong pass u wanker'
-    elif key == config['apiinfo']['tempkey']:
-        if dataset == 'CLIENT_ID':
             return CLIENT_ID
         if dataset == 'guildid':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
             return guildid
         if dataset == 'CLIENT_SECRET':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
             return CLIENT_SECRET
         if dataset == 'bottoken':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
             return CLIENT_TOKEN
         if dataset == 'exchangepass':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
             return exchangepass
         if dataset == 'welcomechannel':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
             return welcomechannel
         if dataset == 'verifiedrole':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
             return memberrole
         if dataset == 'restorekey':
+            config['apiinfo']['botsetupcomplete'] = 'yes'
+            with open('database.ini', 'w') as configfile:
+                config.write(configfile)
             return restorekey
         else:
             return 'fail datasetval needed'
     else:
-        return 'fail key needed'
+        return 'fail setup done alr'
 
         
 @application.route('/checkifverifydone', methods=['GET', 'POST'])
