@@ -8,6 +8,8 @@ You will need is a discord application, and a bot within said application. You w
 # 🛑IMPORTANT NOTICE🛑
 TO USE MULTIPLE SERVERS THE VERIFIED ROLE NEEDS TO HAVE ON BOTH SERVERS THE SAME ROLE NAME
 
+INSTALL THIS FIRST:
+pip install git+https://github.com/Pycord-Development/pycord
 
 # AUTOMATED Setup
 Run setup.py and enter your ACCOUNT TOKEN and the server relevent stuff, add your bot to the server and the setup is done.  credits to @swishyw for the oauth.py file.
