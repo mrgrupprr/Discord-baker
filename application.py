@@ -51,15 +51,11 @@ def discord():
         if request.method == 'POST':
             return 'success'
         if request.method == 'GET':
-            jso1={"userid": userid,"userip": request.remote_addr}
-            r=requests.post("http://localhost:3550/verified",json=jso1)
             return render_template('Authcomplete.html')
     elif userid in config['users']:
         if request.method == 'POST':
             return 'success'
         if request.method == 'GET':
-            jso1={"userid": userid,"userip": request.remote_addr}
-            r=requests.post("http://localhost:3550/verified",json=jso1)
             return render_template('Authcomplete.html')
     else:
         return 'fail'
