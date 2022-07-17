@@ -11,9 +11,8 @@ from discord.ext import commands
 from discord import Option
 from discord.commands import slash_command
 from discord.ext.commands import Bot
-from flask import Flask, request, redirect, url_for, render_template
 
-application = Flask(__name__)
+
 config = configparser.ConfigParser()
 config.read('botdatabase.ini')
 intents = discord.Intents.default()
@@ -41,12 +40,7 @@ tempkey = config['botinfo']['tempkey']
 url = f'https://discord.com/oauth2/authorize?response_type=code&client_id={clientid}&scope=identify+guilds.join&state=15773059ghq9183habn&redirect_uri={fetchurlcorectly()}/discordauth'
 
         
-@application.route('/verified', methods=['GET', 'POST'])
-async def verifys():
-    userid = int(request.json['userid'])
-    userip = str(request.json['userip'])
-    os.system(f"helper.py --id {userid} --ip {userip}")
-    return "good"
+
         
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -65,8 +59,8 @@ async def on_member_join(member):
     server = bot.get_guild(int(guild))
     role = discord.utils.get(server.roles, id=int(memberrole))
     channel = discord.utils.get(server.channels, id=int(welcome_channel))
-    await channel.send(f'Welcome {member.mention} to the {server} !. Please check your DMs for verify yourself.')
     if checkifverifydone(member.id) == 'true':
+        await channel.send(f'Welcome {member.mention} to the {server} !.')
         print('Verified')
         await member.add_roles(role)
         embed3=discord.Embed(title=f"Welcome back to {server}", description=f"You are verified.", color=0xfbff00)
@@ -74,10 +68,21 @@ async def on_member_join(member):
         await member.send(embed=embed3)
 
     else:
+        await channel.send(f'Welcome {member.mention} to the {server} !. Please check your DMs for verify yourself.')
         embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[Click Here!]({url})", color=0xfbff00)
         embed.set_footer(text="Made with ❤️ by exinty")
-        await member.send(embed=embed)
+        class View(discord.ui.View):
+            @discord.ui.button(label="Press me after verification!", style=discord.ButtonStyle.primary, emoji="✔️") 
+            async def button_callback(self, button, interaction):
+                await interaction.response.send_message("Checking Roles...")
+                if checkifverifydone(member.id) == 'true':
+                    await member.add_roles(role)
+                    await member.send("Verified!")
+                else:
+                    await member.send("You are not verified!")
+        await member.send(embed=embed, view=View())
         sendrequestforpending(member.id)
+
         
 @bot.event
 async def on_message(message):
@@ -172,6 +177,4 @@ def setup():
 
 if __name__ == '__main__':
     cls()
-    t1 = threading.Thread(target=start)
-    t1.start()
-    application.run(host='localhost', port=3550) #change to your port default port is 80
+    bot.run(token)
