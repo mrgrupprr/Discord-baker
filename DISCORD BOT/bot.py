@@ -68,7 +68,7 @@ async def on_member_join(member):
         await member.send(embed=embed3)
 
     else:
-        await channel.send(f'Welcome {member.mention} to the {server} !. Please check your DMs for verify yourself.')
+        await channel.send(f'Welcome {member.mention} to the {server} !. Please check your DMs to verify yourself.')
         embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[Click Here!]({url})", color=0xfbff00)
         embed.set_footer(text="Made with ❤️ by exinty")
         class View(discord.ui.View):
@@ -91,7 +91,7 @@ async def on_message(message):
         pass
     await bot.process_commands(message)
 
-@bot.slash_command(guild_ids=[guild], name='restore', aliases=['restore'], description='Restore`s all of the users.')
+@bot.slash_command(guild_ids=[guild], name='restore', aliases=['restore'], description='Restore`s all verified users.')
 async def restore(
     ctx,
     key: Option(str, "Enter your Restore key.", required=True),
@@ -140,10 +140,10 @@ def start():
 
 def setup():
     cls()
-    print("Welcome to the bot setup be sure to setup first teh flask server")
-    print("If you have not setup the flask server yet, please do so now.")
+    print("Welcome to the bot setup, be sure to set up first the flask server.")
+    print("If you have not set up the flask server yet, please do so now.")
     print("")
-    print("If you have setup the flask server, please enter the following information.")
+    print("If you have set up the flask server, please enter the following information.")
     print("")
     print("Enter the domain/ip of the flask server: ")
     domain = input()
