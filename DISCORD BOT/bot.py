@@ -177,4 +177,4 @@ def setup():
 
 if __name__ == '__main__':
     cls()
-    bot.run(token)
+    start()
