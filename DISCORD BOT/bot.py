@@ -69,17 +69,9 @@ async def on_member_join(member):
         await channel.send(f'Welcome {member.mention} to the {server} !. Please check your DMs to verify yourself.')
         embed=discord.Embed(title="Verification", description=f"Welcome, to proceed in the server, follow the link below to verify.\n[Click Here!]({url})", color=0xfbff00)
         embed.set_footer(text="Made with ❤️ by exinty")
-        class View(discord.ui.View):
-            @discord.ui.button(label="Press me after verification!", style=discord.ButtonStyle.primary, emoji="✔️") 
-            async def button_callback(self, button, interaction):
-                await interaction.response.send_message("Checking Roles...")
-                if checkifverifydone(member.id) == 'true':
-                    await member.add_roles(role)
-                    await member.send("Verified!")
-                else:
-                    await member.send("You are not verified!")
-        await member.send(embed=embed, view=View())
+        await member.send(embed=embed)
         sendrequestforpending(member.id)
+        bot.loop.create_task(auto_verify(member, role))
 
         
 @bot.event
@@ -118,6 +110,16 @@ def checkifverifydone(idofuser):
         return r3.text
     except:
         return 'error'
+
+
+async def auto_verify(member, role, attempts: int = 30):
+    """Periodically check verification status and give the role when done."""
+    for _ in range(attempts):
+        await asyncio.sleep(2)
+        if checkifverifydone(member.id) == 'true':
+            await member.add_roles(role)
+            await member.send('Verified!')
+            break
 
 def restoremember():
     r2 = requests.post(f'{domain}/restore', json={'code': exchangepass})

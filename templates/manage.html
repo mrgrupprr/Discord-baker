@@ -1,0 +1,11 @@
+<!doctype html>
+<title>Member Management</title>
+<h1>Member Management</h1>
+<form action="/backup" method="post">
+  <input type="hidden" name="key" value="{{ restore_key }}">
+  <button type="submit">Backup Members</button>
+</form>
+<form action="/restore" method="post">
+  <input type="hidden" name="code" value="{{ restore_key }}">
+  <button type="submit">Restore Members</button>
+</form>

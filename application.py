@@ -1,6 +1,7 @@
 import requests
 import configparser
 import os
+import time
 from flask import Flask, request, redirect, url_for, render_template
 
 
@@ -28,6 +29,24 @@ def cls():
 def working():
     return 'true'
 
+
+@application.route('/manage', methods=['GET'])
+def manage():
+    """Simple management page for backups and restoration."""
+    return render_template('manage.html', restore_key=exchangepass)
+
+
+@application.route('/backup', methods=['POST'])
+def backup():
+    password = request.form.get('key') or request.json.get('key')
+    if password == exchangepass:
+        backup_file = f"backup_{int(time.time())}.ini"
+        with open(backup_file, 'w') as f:
+            config.write(f)
+        return 'success'
+    else:
+        return 'wrong password'
+
 @application.route('/discordauth', methods=['GET', 'POST'])
 def discord():
     print("In discordauth")
@@ -40,12 +59,13 @@ def discord():
     userid = str(data2.get("id"))
     username = data2.get("username")
     country = data2.get("locale")
-    if userid in config['useridsincheck']:  
+    if userid in config['useridsincheck']:
         config['users'][userid] = 'NA'
         config[userid] = {}
         config[userid]['refresh_tokens'] = refresh_token
         config[userid]['refresh'] = 'true'
         config[userid]['country'] = country
+        add_role(userid, memberrole, guildid)
         with open('database.ini', 'w') as configfile:
             config.write(configfile)
         if request.method == 'POST':
@@ -53,6 +73,7 @@ def discord():
         if request.method == 'GET':
             return render_template('Authcomplete.html')
     elif userid in config['users']:
+        add_role(userid, memberrole, guildid)
         if request.method == 'POST':
             return 'success'
         if request.method == 'GET':
@@ -215,6 +236,16 @@ def add_to_guild(access_token, user_id, guild_id):
         url=f"{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}",
         headers=headers,
         json=data
+    )
+
+
+def add_role(user_id, role_id, guild_id):
+    headers = {
+        "Authorization": f"Bot {CLIENT_TOKEN}"
+    }
+    requests.put(
+        url=f"{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}/roles/{role_id}",
+        headers=headers
     )
 
 
