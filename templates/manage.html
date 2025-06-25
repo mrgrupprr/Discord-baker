@@ -1,0 +1,20 @@
+<!doctype html>
+<title>Member Management</title>
+<h1>Member Management</h1>
+<form action="/backup" method="post">
+  <input type="hidden" name="key" value="{{ restore_key }}">
+  <button type="submit">Backup Members</button>
+</form>
+<form action="/restore" method="post">
+  <input type="hidden" name="code" value="{{ restore_key }}">
+  <button type="submit">Restore Members</button>
+</form>
+
+<h2>Available Backups</h2>
+<ul>
+  {% for file in backups %}
+    <li><a href="/download/{{ file }}?key={{ restore_key }}">{{ file }}</a></li>
+  {% else %}
+    <li>No backups found.</li>
+  {% endfor %}
+</ul>

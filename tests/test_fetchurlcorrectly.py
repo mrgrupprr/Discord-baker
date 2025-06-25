@@ -26,3 +26,15 @@ def test_no_trailing_slash_unchanged():
     func = load_fetch_function()
     func.__globals__['domain'] = 'https://example.com'
     assert func() == 'https://example.com'
+
+
+def test_multiple_trailing_slashes_removed():
+    func = load_fetch_function()
+    func.__globals__['domain'] = 'https://example.com///'
+    assert func() == 'https://example.com'
+
+
+def test_non_string_domain_returns_unmodified():
+    func = load_fetch_function()
+    func.__globals__['domain'] = None
+    assert func() is None

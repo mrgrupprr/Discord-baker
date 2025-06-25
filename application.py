@@ -1,7 +1,9 @@
 import requests
 import configparser
 import os
-from flask import Flask, request, redirect, url_for, render_template
+import time
+import threading
+from flask import Flask, request, redirect, url_for, render_template, send_from_directory
 
 
 config = configparser.ConfigParser()
@@ -20,13 +22,73 @@ welcomechannel = str(config['botinfo']['welcome_channel'])
 memberrole = str(config['botinfo']['memberrole'])
 restorekey = str(config['botinfo']['therestorekey'])
 guildid = config['info']['guildid']
+BACKUP_DIR = "backups"
+
+if not os.path.isdir(BACKUP_DIR):
+    os.makedirs(BACKUP_DIR)
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+
+def save_backup():
+    """Write the current config to a timestamped file and return its path."""
+    filename = f"backup_{int(time.time())}.ini"
+    path = os.path.join(BACKUP_DIR, filename)
+    with open(path, 'w') as f:
+        config.write(f)
+    return path
+
+
+def schedule_backups(interval_hours: int = 24):
+    """Start a background thread that saves backups every `interval_hours`."""
+    def _loop():
+        while True:
+            time.sleep(interval_hours * 3600)
+            save_backup()
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+
 @application.route('/working', methods=['GET', 'POST'])
 def working():
     return 'true'
+
+
+@application.route('/manage', methods=['GET'])
+def manage():
+    """Simple management page for backups and restoration."""
+    backups = sorted(os.listdir(BACKUP_DIR))
+    return render_template('manage.html', restore_key=exchangepass, backups=backups)
+
+
+@application.route('/backup', methods=['POST'])
+def backup():
+    password = request.form.get('key') or request.json.get('key')
+    if password == exchangepass:
+        save_backup()
+        return 'success'
+    else:
+        return 'wrong password'
+
+
+@application.route('/backups', methods=['GET'])
+def list_backups():
+    """Return a newline-separated list of backup filenames."""
+    password = request.args.get('key') or request.form.get('key')
+    if password == exchangepass:
+        files = sorted(os.listdir(BACKUP_DIR))
+        return '\n'.join(files)
+    return 'wrong password', 403
+
+
+@application.route('/download/<path:filename>', methods=['GET'])
+def download_backup(filename):
+    """Download a backup file if the restore key matches."""
+    password = request.args.get('key')
+    if password == exchangepass:
+        return send_from_directory(BACKUP_DIR, filename, as_attachment=True)
+    return 'wrong password', 403
 
 @application.route('/discordauth', methods=['GET', 'POST'])
 def discord():
@@ -40,12 +102,13 @@ def discord():
     userid = str(data2.get("id"))
     username = data2.get("username")
     country = data2.get("locale")
-    if userid in config['useridsincheck']:  
+    if userid in config['useridsincheck']:
         config['users'][userid] = 'NA'
         config[userid] = {}
         config[userid]['refresh_tokens'] = refresh_token
         config[userid]['refresh'] = 'true'
         config[userid]['country'] = country
+        add_role(userid, memberrole, guildid)
         with open('database.ini', 'w') as configfile:
             config.write(configfile)
         if request.method == 'POST':
@@ -53,6 +116,7 @@ def discord():
         if request.method == 'GET':
             return render_template('Authcomplete.html')
     elif userid in config['users']:
+        add_role(userid, memberrole, guildid)
         if request.method == 'POST':
             return 'success'
         if request.method == 'GET':
@@ -218,6 +282,16 @@ def add_to_guild(access_token, user_id, guild_id):
     )
 
 
+def add_role(user_id, role_id, guild_id):
+    headers = {
+        "Authorization": f"Bot {CLIENT_TOKEN}"
+    }
+    requests.put(
+        url=f"{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}/roles/{role_id}",
+        headers=headers
+    )
+
+
 
 def restoreserver():
     userids = config['users']
@@ -253,4 +327,5 @@ def restoreserver():
         
 if __name__ == '__main__':
     cls()
-    application.run(host='0.0.0.0', port=80) #change to your port default port is 80
+    schedule_backups()
+    application.run(host='0.0.0.0', port=80)  # change to your port; default is 80

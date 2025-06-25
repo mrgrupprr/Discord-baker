@@ -83,11 +83,13 @@ Add me if you need more help: `haze#2603`
 
 
 # Roadmap
-List of things i'm planning to add:
+Implemented features:
 
-- Web GUI for restoring/backuping the members
-- Telegram bot For restoring/backuping
-- Command less verify (give roles as soon as user authorizes)
+- Web GUI for restoring/backing up the members (`/manage`)
+- Telegram bot for restoring/backing up (`telegrambot.py`)
+- Command-less verify (roles granted automatically after authorization)
+- Automatic daily backups stored in `backups/`
+- Manage and download backups through the `/manage` page
 
 # Advanced
 Feel free to modify this code, but remember to credit this repo.
