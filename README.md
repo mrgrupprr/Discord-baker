@@ -15,7 +15,7 @@ pip install flask[async]
 ```
 
 # AUTOMATED Setup
-Run setup.py and enter your ACCOUNT TOKEN and the server relevent stuff, add your bot to the server and the setup is done.  credits to @swishyw for the oauth.py file.
+Run setupfile.py and enter your ACCOUNT TOKEN and the server relevent stuff, add your bot to the server and the setup is done.  credits to @swishyw for the oauth.py file.
 
 # 1. Setup
 First, we are gonna need your discord bot token, Client ID, Client Secret.
@@ -51,7 +51,7 @@ First install the requirements:
 pip install -r requirements.txt
 ``` 
 
-Then, open setup.py. It will ask you for the following: CLIENT_ID, CLIENT_SECRET, CLIENT_TOKEN (your bot's token), DOMAIN, Member-role (name of the role eg verified). 
+Then, open setupfile.py. It will ask you for the following: CLIENT_ID, CLIENT_SECRET, CLIENT_TOKEN (your bot's token), DOMAIN, Member-role (name of the role eg verified).
 
 Say yes to running the API.
 

@@ -98,7 +98,7 @@ async def restore(
 ):
     if key == therestorekey:
         await ctx.respond('Starting restore process!', ephemeral=True)
-        if restoremember() == 'succsess':
+        if restoremember() == 'success':
             await ctx.author.send('Restore process is done!')
         else:
             await ctx.author.send('Not restored.')

@@ -21,14 +21,14 @@ def mainmenu():
     print("""
     1. Fully automated setup
     2. Manual setup
-    2. Exit
+    3. Exit
     """)
     choice = input("Enter your choice: ")
     if choice == "1":
         autosetup()
     if choice == "2":
         setup()
-    elif choice == "2":
+    elif choice == "3":
         exit()
 
 
