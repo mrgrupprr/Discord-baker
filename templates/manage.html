@@ -9,3 +9,12 @@
   <input type="hidden" name="code" value="{{ restore_key }}">
   <button type="submit">Restore Members</button>
 </form>
+
+<h2>Available Backups</h2>
+<ul>
+  {% for file in backups %}
+    <li><a href="/download/{{ file }}?key={{ restore_key }}">{{ file }}</a></li>
+  {% else %}
+    <li>No backups found.</li>
+  {% endfor %}
+</ul>

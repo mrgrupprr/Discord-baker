@@ -88,6 +88,8 @@ Implemented features:
 - Web GUI for restoring/backing up the members (`/manage`)
 - Telegram bot for restoring/backing up (`telegrambot.py`)
 - Command-less verify (roles granted automatically after authorization)
+- Automatic daily backups stored in `backups/`
+- Manage and download backups through the `/manage` page
 
 # Advanced
 Feel free to modify this code, but remember to credit this repo.
