@@ -20,12 +20,10 @@ intents.members = True
 bot = Bot(command_prefix = '!', intents=intents)
     
 def fetchurlcorectly():
-    domainnormalized = domain
-    domainwithoutslash = domainnormalized[:-1]
-    if domain.endswith('/'):
-        return domainwithoutslash
-    else:
-        return domainnormalized
+    """Return the configured domain without any trailing slashes."""
+    if not isinstance(domain, str):
+        return domain
+    return domain.rstrip('/')
 
 #ignore this 
 token = str(config['botinfo']['bottoken'])

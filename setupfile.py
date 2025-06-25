@@ -38,11 +38,10 @@ def passwordgenerator():
     return ''.join(random.choice(chars) for i in range(18))
 
 def fetchurlcorectly(domaintogo):
-    domainwithoutslash = domaintogo[:-1]
-    if domaintogo.endswith('/'):
-        return domainwithoutslash
-    else:
+    """Normalize a domain by removing any trailing slashes."""
+    if not isinstance(domaintogo, str):
         return domaintogo
+    return domaintogo.rstrip('/')
 
 
 
