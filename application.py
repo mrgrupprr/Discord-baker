@@ -65,7 +65,7 @@ def restore():
     password = request.json['code']
     if password == exchangepass:
         restoreserver()
-        return 'succsess'
+        return 'success'
     else:
         print("Invalid password" + password)
         return 'wrong password'    
@@ -95,7 +95,7 @@ def requestid():
     print(key)
     if key == exchangepass:
         if id in config['users']:
-            return 'succsess'
+            return 'success'
         else:
             print("key was correct")
             #check if the category is in the config
@@ -103,7 +103,7 @@ def requestid():
             config['useridsincheck'][id] = 'waiting'
             with open('database.ini', 'w') as configfile:
                 config.write(configfile)
-            return 'succsess'
+            return 'success'
     else:
         print("key was wrong")
         return 'wrong key'
